@@ -31,7 +31,7 @@ md"""
 begin
 
 	function intial(x,t)
-		return x^2
+		return 10*ℯ^(-x^2)
 	end
 end
 
@@ -60,14 +60,17 @@ begin
 	# Rather than handle the edges properly, let's just zero the first and last rows. 
 	# We return to boundary conditions shortly.
 
-	# Periodic boundaries
+	# Fixed boundaries
 	dxx[1,1] = -1
 	dxx[end,end] = -1
 
-	potential = diagm(0=>(LinRange(-5,5,Nx2))).^2
+	potential = diagm(0=>x2.^2)
 
 	potential_mat = sparse(potential);
 end
+
+# ╔═╡ 384da55e-a735-4040-a9a3-5de12bb85219
+diagm(1=>onex2,-1=>onex2,0=>-2one.(x2))
 
 # ╔═╡ eca97e67-3907-42fb-85eb-f4223bb97164
 begin
@@ -107,7 +110,7 @@ begin
 			# dρ .= to_be_normalised./normalised
 
 			# try without normalising
-			dρ= (-1/2)*Dxx*ρ + (1/2)*potential_mat*ρ
+			dρ .= -(1/2)*Dxx*ρ + (1/2)*potential_mat*ρ
 		end 
 
 	prob1 = ODEProblem(schrod!,ρ02,tspan1)
@@ -2516,6 +2519,7 @@ version = "1.4.1+2"
 # ╠═f8d3ed5e-5789-4b7f-ba06-fa0d6a336c1d
 # ╠═4bb2c9b8-4e56-405b-ad2c-cda8827679ce
 # ╠═a622d335-01ce-46d2-97ec-6a307f58d906
+# ╠═384da55e-a735-4040-a9a3-5de12bb85219
 # ╠═eca97e67-3907-42fb-85eb-f4223bb97164
 # ╠═57723e76-6293-42b5-91a8-4f259ba929de
 # ╠═1705b57d-9ff9-4616-a382-e2bde6a2d92a
