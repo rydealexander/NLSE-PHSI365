@@ -60,14 +60,14 @@ begin
 	# Rather than handle the edges properly, let's just zero the first and last rows. 
 	# We return to boundary conditions shortly.
 
+	# Periodic boundaries
 	dxx[1,1] = -1
 	dxx[end,end] = -1
 
-	potential_mat = sparse(-1 .*diagm(0=>LinRange(-5,5,Nx2)));
-end
+	potential = diagm(0=>(LinRange(-5,5,Nx2))).^2
 
-# ╔═╡ 55bb8614-10a4-41c6-a7ee-7074d689ec6d
-dxx
+	potential_mat = sparse(potential);
+end
 
 # ╔═╡ eca97e67-3907-42fb-85eb-f4223bb97164
 begin
@@ -89,16 +89,25 @@ begin
 
 end
 
+# ╔═╡ 1705b57d-9ff9-4616-a382-e2bde6a2d92a
+(-1/2)*Dxx + (1/2)*potential_mat
+
 # ╔═╡ 62210722-8c7d-4548-a3f4-977fc42cc422
 begin
 	
 	function schrod!(dρ,ρ,p,t)
-			to_be_normalised = (im/2)*Dxx*ρ - (im/2)*potential_mat*ρ  # syntax .=  writes in place, element-wise 
-			normalised = 0.0
-			for i in 1:length(to_be_normalised)
-				normalised += dx2*to_be_normalised[i]
-			end
-			dρ .= to_be_normalised./normalised
+
+			# Dxx, potential_mat = p
+			# Try with normalising
+			# to_be_normalised = (-1/2)*Dxx*ρ + (1/2)*potential_mat*ρ  # syntax .=  writes in place, element-wise 
+			# normalised = 0.0
+			# for i in 1:length(to_be_normalised)
+			# 	normalised += dx2*to_be_normalised[i]
+			# end
+			# dρ .= to_be_normalised./normalised
+
+			# try without normalising
+			dρ= (-1/2)*Dxx*ρ + (1/2)*potential_mat*ρ
 		end 
 
 	prob1 = ODEProblem(schrod!,ρ02,tspan1)
@@ -106,6 +115,9 @@ begin
 	sol1 = solve(prob1,alg=alg1,saveat=tp1)
 
 end
+
+# ╔═╡ b982e80c-e619-4778-be21-4181fa15dc71
+tp1
 
 # ╔═╡ d315c9d2-a8e5-414a-81de-7977dbb292dc
 @bind i Slider(eachindex(tp1))
@@ -2504,10 +2516,11 @@ version = "1.4.1+2"
 # ╠═f8d3ed5e-5789-4b7f-ba06-fa0d6a336c1d
 # ╠═4bb2c9b8-4e56-405b-ad2c-cda8827679ce
 # ╠═a622d335-01ce-46d2-97ec-6a307f58d906
-# ╠═55bb8614-10a4-41c6-a7ee-7074d689ec6d
 # ╠═eca97e67-3907-42fb-85eb-f4223bb97164
 # ╠═57723e76-6293-42b5-91a8-4f259ba929de
+# ╠═1705b57d-9ff9-4616-a382-e2bde6a2d92a
 # ╠═62210722-8c7d-4548-a3f4-977fc42cc422
+# ╠═b982e80c-e619-4778-be21-4181fa15dc71
 # ╠═d315c9d2-a8e5-414a-81de-7977dbb292dc
 # ╠═a16860c3-3620-4a5b-a829-cabda2967ab6
 # ╟─00000000-0000-0000-0000-000000000001
