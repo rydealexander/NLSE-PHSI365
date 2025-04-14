@@ -31,7 +31,7 @@ md"""
 begin
 
 	function intial(x,t)
-		return exp(-x^2)
+		return x^2
 	end
 end
 
@@ -128,7 +128,7 @@ begin
 	plot!(x2,sol1[i][:],lw=1.5,c=:blue)
 	title!("t=$(round(tp1[i],sigdigits=3)) s")
 	xlabel!("x");ylabel!("Schrod")
-	ylims!(0, 10)
+	ylims!(-10, 10)
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
