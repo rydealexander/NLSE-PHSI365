@@ -69,9 +69,6 @@ begin
 	potential_mat = sparse(potential);
 end
 
-# ╔═╡ 384da55e-a735-4040-a9a3-5de12bb85219
-diagm(1=>onex2,-1=>onex2,0=>-2one.(x2))
-
 # ╔═╡ eca97e67-3907-42fb-85eb-f4223bb97164
 begin
 	dxx ./= dx2^2 # remember the differentials!
@@ -108,6 +105,25 @@ begin
 
 	σ, u = eigen(total_mat_full)
 	
+end
+
+# ╔═╡ c0cd8eab-b23c-4632-abec-c5abcf6f8fbc
+
+
+# ╔═╡ aa473863-17c6-4844-bd31-d2c6628599cc
+@bind eig Slider(1:length(σ))
+
+# ╔═╡ 58ea405a-73fd-42c3-9a99-0f98e1a9f90c
+begin
+
+	# Plot eigenstates and eigenenergies
+
+	plot()
+	plot!(x2,abs.(u[:,eig]).^2,lw=1.5,c=:blue)
+	title!("Eigenenergy=$(σ[eig]) s")
+	xlabel!("x");ylabel!("Eigenenergies")
+	ylims!(-0.1, 0.1)
+
 end
 
 # ╔═╡ 3c58e3d9-8167-4d72-b65b-a181c504c8a8
@@ -2582,11 +2598,13 @@ version = "1.4.1+2"
 # ╠═f8d3ed5e-5789-4b7f-ba06-fa0d6a336c1d
 # ╠═4bb2c9b8-4e56-405b-ad2c-cda8827679ce
 # ╠═a622d335-01ce-46d2-97ec-6a307f58d906
-# ╠═384da55e-a735-4040-a9a3-5de12bb85219
 # ╠═eca97e67-3907-42fb-85eb-f4223bb97164
 # ╠═57723e76-6293-42b5-91a8-4f259ba929de
 # ╠═1705b57d-9ff9-4616-a382-e2bde6a2d92a
 # ╠═d8d02d62-7f3d-44eb-a0d5-b40ac492b7d4
+# ╠═c0cd8eab-b23c-4632-abec-c5abcf6f8fbc
+# ╠═aa473863-17c6-4844-bd31-d2c6628599cc
+# ╠═58ea405a-73fd-42c3-9a99-0f98e1a9f90c
 # ╠═3c58e3d9-8167-4d72-b65b-a181c504c8a8
 # ╠═62210722-8c7d-4548-a3f4-977fc42cc422
 # ╠═b982e80c-e619-4778-be21-4181fa15dc71
