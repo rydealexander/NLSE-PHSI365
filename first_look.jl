@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.4
+# v0.20.6
 
 using Markdown
 using InteractiveUtils
@@ -7,7 +7,7 @@ using InteractiveUtils
 # This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
 macro bind(def, element)
     #! format: off
-    quote
+    return quote
         local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
         local el = $(esc(element))
         global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
@@ -102,10 +102,38 @@ begin
 
 	# We can then find the eigenenergies and eigenvalues from this matrix, equivalent to solving the time independent schrodinger equation. Finally, we can compare these with the modes we expect from the simple harmonic oscillator.
 
-	Total_Mat = -(1/2).*Dxx + (1/2).*potential_mat
+	# Total_Mat = -(1/2).*Dxx + (1/2).*potential_mat
 
-	σ, u = eigen(Total_Mat)
+	total_mat_full = -(1/2).*dxx + (1/2).*potential
+
+	σ, u = eigen(total_mat_full)
 	
+end
+
+# ╔═╡ 3c58e3d9-8167-4d72-b65b-a181c504c8a8
+begin
+
+	# Lets set up the system for our nonlinear equation, the Gross-Pitaevskii eqn
+
+	g = 1.0
+
+	function gpe(dρ,ρ,p,t)
+
+			# Dxx, potential_mat = p
+			# Try with normalising
+			to_be_normalised = (-1/2)*Dxx*ρ + g.*(abs.(ρ).^2).*ρ  
+		
+			normalised = 0.0
+			for i in 1:length(to_be_normalised)
+				normalised += dx2*to_be_normalised[i]
+			end
+		
+			dρ .= to_be_normalised./sqrt(abs(normalised))
+
+			# try without normalising
+			# dρ .= (-1/2)*Dxx*ρ + g*(abs(ρ)^2)*ρ
+		end 
+
 end
 
 # ╔═╡ 62210722-8c7d-4548-a3f4-977fc42cc422
@@ -148,6 +176,27 @@ begin
 	ylims!(-10, 10)
 end
 
+# ╔═╡ f1ee2c87-582b-4f92-bf9d-b417edd09f04
+begin
+
+	probgpe = ODEProblem(gpe,ρ02,tspan1)
+
+	solgpe = solve(probgpe,alg=alg1,saveat=tp1)
+	
+end
+
+# ╔═╡ fafb27e3-1826-4c09-b745-2dc7fd9f93af
+@bind i2 Slider(eachindex(tp1))
+
+# ╔═╡ 8dcd97a7-35ae-42ca-a923-3244d58c8628
+begin
+	plot()
+	plot!(x2,solgpe[i2][:],lw=1.5,c=:blue)
+	title!("t=$(round(tp1[i2],sigdigits=3)) s")
+	xlabel!("x");ylabel!("GPE")
+	ylims!(-10, 10)
+end
+
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
@@ -167,7 +216,7 @@ PlutoUI = "~0.7.62"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.11.4"
+julia_version = "1.11.5"
 manifest_format = "2.0"
 project_hash = "65e433abaad84d638a7c8ed95aebc82dd3e4e696"
 
@@ -1391,7 +1440,7 @@ version = "0.3.27+1"
 [[deps.OpenLibm_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "05823500-19ac-5b8b-9628-191a04bc5112"
-version = "0.8.1+4"
+version = "0.8.5+0"
 
 [[deps.OpenSSL]]
 deps = ["BitFlags", "Dates", "MozillaCACerts_jll", "OpenSSL_jll", "Sockets"]
@@ -2538,9 +2587,13 @@ version = "1.4.1+2"
 # ╠═57723e76-6293-42b5-91a8-4f259ba929de
 # ╠═1705b57d-9ff9-4616-a382-e2bde6a2d92a
 # ╠═d8d02d62-7f3d-44eb-a0d5-b40ac492b7d4
+# ╠═3c58e3d9-8167-4d72-b65b-a181c504c8a8
 # ╠═62210722-8c7d-4548-a3f4-977fc42cc422
 # ╠═b982e80c-e619-4778-be21-4181fa15dc71
 # ╠═d315c9d2-a8e5-414a-81de-7977dbb292dc
 # ╠═a16860c3-3620-4a5b-a829-cabda2967ab6
+# ╠═f1ee2c87-582b-4f92-bf9d-b417edd09f04
+# ╠═fafb27e3-1826-4c09-b745-2dc7fd9f93af
+# ╠═8dcd97a7-35ae-42ca-a923-3244d58c8628
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
