@@ -39,8 +39,10 @@ end
 begin
 	# nearest-neighbour approximation to second derivative
 	# first set up on finer grid
+	bounds = 5
+	
 	Nx2 = 500
-	x2 = LinRange(-5,5,Nx2) 
+	x2 = LinRange(-bounds,bounds,Nx2) 
 	dx2 = x2[2]-x2[1]
 	ti = 0.001
 	tf1 = 10
@@ -108,7 +110,7 @@ begin
 end
 
 # ╔═╡ c0cd8eab-b23c-4632-abec-c5abcf6f8fbc
-
+total_mat_full
 
 # ╔═╡ aa473863-17c6-4844-bd31-d2c6628599cc
 @bind eig Slider(1:length(σ))
@@ -117,13 +119,13 @@ end
 begin
 
 	# Plot eigenstates and eigenenergies
-	bounds = 0.5
 
 	plot()
 	plot!(x2,u[:,eig],lw=1.5,c=:blue)
 	title!("Eigenenergy=$(σ[eig])")
 	xlabel!("x");ylabel!("Eigenenergies")
-	ylims!(-bounds, bounds)
+	xlims!(-bounds,bounds)
+	ylims!(-1, 1)
 
 end
 
