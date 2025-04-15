@@ -41,7 +41,7 @@ begin
 	# first set up on finer grid
 	bounds = 5
 	
-	Nx2 = 500
+	Nx2 = 750
 	x2 = LinRange(-bounds,bounds,Nx2) 
 	dx2 = x2[2]-x2[1]
 	ti = 0.001
@@ -91,9 +91,6 @@ begin
 
 end
 
-# ╔═╡ 1705b57d-9ff9-4616-a382-e2bde6a2d92a
-(-1/2)*Dxx + (1/2)*potential_mat
-
 # ╔═╡ d8d02d62-7f3d-44eb-a0d5-b40ac492b7d4
 begin
 
@@ -109,9 +106,6 @@ begin
 	
 end
 
-# ╔═╡ c0cd8eab-b23c-4632-abec-c5abcf6f8fbc
-total_mat_full
-
 # ╔═╡ aa473863-17c6-4844-bd31-d2c6628599cc
 @bind eig Slider(1:length(σ))
 
@@ -125,7 +119,7 @@ begin
 	title!("Eigenenergy=$(σ[eig])")
 	xlabel!("x");ylabel!("Eigenenergies")
 	xlims!(-bounds,bounds)
-	ylims!(-1, 1)
+	# ylims!(-1, 1)
 
 end
 
@@ -2603,9 +2597,7 @@ version = "1.4.1+2"
 # ╠═a622d335-01ce-46d2-97ec-6a307f58d906
 # ╠═eca97e67-3907-42fb-85eb-f4223bb97164
 # ╠═57723e76-6293-42b5-91a8-4f259ba929de
-# ╠═1705b57d-9ff9-4616-a382-e2bde6a2d92a
 # ╠═d8d02d62-7f3d-44eb-a0d5-b40ac492b7d4
-# ╠═c0cd8eab-b23c-4632-abec-c5abcf6f8fbc
 # ╠═aa473863-17c6-4844-bd31-d2c6628599cc
 # ╠═58ea405a-73fd-42c3-9a99-0f98e1a9f90c
 # ╠═3c58e3d9-8167-4d72-b65b-a181c504c8a8
