@@ -95,6 +95,19 @@ end
 # ╔═╡ 1705b57d-9ff9-4616-a382-e2bde6a2d92a
 (-1/2)*Dxx + (1/2)*potential_mat
 
+# ╔═╡ d8d02d62-7f3d-44eb-a0d5-b40ac492b7d4
+begin
+
+	# Because of distributive property of matrix multiplication, we can combine these two matrices (arising from our second derivative and our potential term) into one matrix.
+
+	# We can then find the eigenenergies and eigenvalues from this matrix, equivalent to solving the time independent schrodinger equation. Finally, we can compare these with the modes we expect from the simple harmonic oscillator.
+
+	Total_Mat = -(1/2).*Dxx + (1/2).*potential_mat
+
+	σ, u = eigen(Total_Mat)
+	
+end
+
 # ╔═╡ 62210722-8c7d-4548-a3f4-977fc42cc422
 begin
 	
@@ -102,15 +115,16 @@ begin
 
 			# Dxx, potential_mat = p
 			# Try with normalising
-			# to_be_normalised = (-1/2)*Dxx*ρ + (1/2)*potential_mat*ρ  # syntax .=  writes in place, element-wise 
-			# normalised = 0.0
-			# for i in 1:length(to_be_normalised)
-			# 	normalised += dx2*to_be_normalised[i]
-			# end
-			# dρ .= to_be_normalised./sqrt(normalised)
+			to_be_normalised = (-1/2)*Dxx*ρ + (1/2)*potential_mat*ρ  
+		
+			normalised = 0.0
+			for i in 1:length(to_be_normalised)
+				normalised += dx2*to_be_normalised[i]
+			end
+			dρ .= to_be_normalised./sqrt(abs(normalised))
 
 			# try without normalising
-			dρ .= -(1/2)*Dxx*ρ + (1/2)*potential_mat*ρ
+			# dρ .= -(1/2)*Dxx*ρ + (1/2)*potential_mat*ρ
 		end 
 
 	prob1 = ODEProblem(schrod!,ρ02,tspan1)
@@ -2523,6 +2537,7 @@ version = "1.4.1+2"
 # ╠═eca97e67-3907-42fb-85eb-f4223bb97164
 # ╠═57723e76-6293-42b5-91a8-4f259ba929de
 # ╠═1705b57d-9ff9-4616-a382-e2bde6a2d92a
+# ╠═d8d02d62-7f3d-44eb-a0d5-b40ac492b7d4
 # ╠═62210722-8c7d-4548-a3f4-977fc42cc422
 # ╠═b982e80c-e619-4778-be21-4181fa15dc71
 # ╠═d315c9d2-a8e5-414a-81de-7977dbb292dc
