@@ -119,7 +119,7 @@ begin
 	# Plot eigenstates and eigenenergies
 
 	plot()
-	plot!(x2,abs.(u[:,eig]).^2,lw=1.5,c=:blue)
+	plot!(x2,u[:,eig],lw=1.5,c=:blue)
 	title!("Eigenenergy=$(σ[eig]) s")
 	xlabel!("x");ylabel!("Eigenenergies")
 	ylims!(-0.1, 0.1)
