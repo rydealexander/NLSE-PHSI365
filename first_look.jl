@@ -117,12 +117,13 @@ end
 begin
 
 	# Plot eigenstates and eigenenergies
+	bounds = 0.5
 
 	plot()
 	plot!(x2,u[:,eig],lw=1.5,c=:blue)
-	title!("Eigenenergy=$(σ[eig]) s")
+	title!("Eigenenergy=$(σ[eig])")
 	xlabel!("x");ylabel!("Eigenenergies")
-	ylims!(-0.1, 0.1)
+	ylims!(-bounds, bounds)
 
 end
 
