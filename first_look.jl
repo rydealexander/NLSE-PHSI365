@@ -107,7 +107,7 @@ begin
 			# for i in 1:length(to_be_normalised)
 			# 	normalised += dx2*to_be_normalised[i]
 			# end
-			# dρ .= to_be_normalised./normalised
+			# dρ .= to_be_normalised./sqrt(normalised)
 
 			# try without normalising
 			dρ .= -(1/2)*Dxx*ρ + (1/2)*potential_mat*ρ
