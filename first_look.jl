@@ -27,14 +27,6 @@ md"""
 
 """
 
-# ╔═╡ 2fa6317b-a540-4106-908e-41af696b30b1
-begin
-
-	function intial_exp(x,t)
-		return ℯ^(-x^2)/sqrt(π) + 0.0im
-	end
-end
-
 # ╔═╡ f8d3ed5e-5789-4b7f-ba06-fa0d6a336c1d
 begin
 
@@ -44,6 +36,10 @@ begin
 	x_granularity = 750
 	x_grid = LinRange(-xbounds,xbounds,x_granularity) 
 	dx2 = x_grid[2]-x_grid[1]
+
+	function intial_exp(x,t)
+		return ℯ^(-(x+2)^2)
+	end
 	
 	ti = 0.001
 	tf = 10
@@ -87,7 +83,7 @@ begin
 
 	σ, u = eigen(H_SHM)
 	
-end
+end;
 
 # ╔═╡ aa473863-17c6-4844-bd31-d2c6628599cc
 @bind eig Slider(1:length(σ))
@@ -113,7 +109,7 @@ begin
 	
 	function schrod_shm(dψ,ψ,p,t)
 
-			dψ = -1.0*im*H_SHM 
+			dψ = -im*H_SHM*ψ
 
 		end 
 
@@ -2526,7 +2522,6 @@ version = "1.4.1+2"
 # ╔═╡ Cell order:
 # ╟─8b6118e4-17fd-11f0-32f5-dd5270d18be9
 # ╠═a5d3665b-0a31-4663-8c25-377e6677593c
-# ╠═2fa6317b-a540-4106-908e-41af696b30b1
 # ╠═f8d3ed5e-5789-4b7f-ba06-fa0d6a336c1d
 # ╠═4bb2c9b8-4e56-405b-ad2c-cda8827679ce
 # ╠═d8d02d62-7f3d-44eb-a0d5-b40ac492b7d4
