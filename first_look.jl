@@ -33,7 +33,7 @@ begin
 	# Set up our x and t grids
 	
 	xbounds = 5
-	x_granularity = 750
+	x_granularity = 500
 	x_grid = LinRange(-xbounds,xbounds,x_granularity) 
 	dx2 = x_grid[2]-x_grid[1]
 
@@ -43,7 +43,7 @@ begin
 	
 	ti = 0.001
 	tf = 5
-	t_granularity = 300
+	t_granularity = 500
 	t_grid = LinRange(ti,tf,t_granularity) 
 
 	# Generate our initial conditions (t=0) on our grid
@@ -114,7 +114,7 @@ begin
 	
 	function schrod_shm(dψ,ψ,p,t)
 
-			dψ = -im * H_SHM * ψ
+			dψ = -1.0*im * H_SHM * ψ
 
 		end 
 
@@ -127,7 +127,7 @@ begin
 end;
 
 # ╔═╡ d02f81fe-5ee3-47ef-aa3b-e8388c4dd92d
-typeof.(sol_shm[1])
+sol_shm
 
 # ╔═╡ 7056bb81-d3e5-40ec-9206-6f443a7dd078
 @bind t_shm Slider(1:length(t_grid))
