@@ -38,7 +38,7 @@ begin
 	dx2 = x_grid[2]-x_grid[1]
 
 	function intial_exp(x,t)
-		return ℯ^(-(x+2)^2)
+		return ℯ^(-x^2) + 0.0im
 	end
 	
 	ti = 0.001
@@ -53,8 +53,8 @@ begin
 	onex2 = one.(x_grid[1:end-1])
 	dxx = diagm(1=>onex2,-1=>onex2,0=>-2one.(x_grid))
 	
-	dxx[1,1] = -1
-	dxx[end,end] = -1
+	# dxx[1,1] = -1
+	# dxx[end,end] = -1
 
 	dxx ./= dx2^2
 
@@ -85,6 +85,9 @@ begin
 	
 end;
 
+# ╔═╡ 2386cdc6-13fc-4e69-b607-053065f5af41
+H_SHM
+
 # ╔═╡ aa473863-17c6-4844-bd31-d2c6628599cc
 @bind eig Slider(1:length(σ))
 
@@ -106,10 +109,12 @@ end
 begin
 
 	# Set up and numerically solve the schrodinger equation for our SHM potential
+
+	# dψ = Array{Complex{Float64}};
 	
 	function schrod_shm(dψ,ψ,p,t)
 
-			dψ = -im*H_SHM*ψ
+			dψ = -im * H_SHM * ψ
 
 		end 
 
@@ -119,13 +124,13 @@ begin
 
 	sol_shm = solve(schrod_shm_prob,alg=alg1,saveat=t_grid)
 
-end
+end;
+
+# ╔═╡ d02f81fe-5ee3-47ef-aa3b-e8388c4dd92d
+sol_shm
 
 # ╔═╡ 7056bb81-d3e5-40ec-9206-6f443a7dd078
 @bind t_shm Slider(1:length(t_grid))
-
-# ╔═╡ bf339a0a-46bf-4df3-9709-a226e85db97d
-sol_shm[:,t_shm]
 
 # ╔═╡ 01455290-a711-4336-9a1f-529ce7e29de9
 begin
@@ -2525,10 +2530,11 @@ version = "1.4.1+2"
 # ╠═f8d3ed5e-5789-4b7f-ba06-fa0d6a336c1d
 # ╠═4bb2c9b8-4e56-405b-ad2c-cda8827679ce
 # ╠═d8d02d62-7f3d-44eb-a0d5-b40ac492b7d4
+# ╠═2386cdc6-13fc-4e69-b607-053065f5af41
 # ╠═aa473863-17c6-4844-bd31-d2c6628599cc
 # ╠═58ea405a-73fd-42c3-9a99-0f98e1a9f90c
 # ╠═62210722-8c7d-4548-a3f4-977fc42cc422
-# ╠═bf339a0a-46bf-4df3-9709-a226e85db97d
+# ╠═d02f81fe-5ee3-47ef-aa3b-e8388c4dd92d
 # ╠═7056bb81-d3e5-40ec-9206-6f443a7dd078
 # ╠═01455290-a711-4336-9a1f-529ce7e29de9
 # ╟─00000000-0000-0000-0000-000000000001
