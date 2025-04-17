@@ -30,66 +30,49 @@ md"""
 # ╔═╡ 2fa6317b-a540-4106-908e-41af696b30b1
 begin
 
-	function intial(x,t)
-		return 10*ℯ^(-x^2)
+	function intial_exp(x,t)
+		return ℯ^(-x^2)/sqrt(π) + 0.0im
 	end
 end
 
 # ╔═╡ f8d3ed5e-5789-4b7f-ba06-fa0d6a336c1d
 begin
-	# nearest-neighbour approximation to second derivative
-	# first set up on finer grid
-	bounds = 5
+
+	# Set up our x and t grids
 	
-	Nx2 = 750
-	x2 = LinRange(-bounds,bounds,Nx2) 
-	dx2 = x2[2]-x2[1]
+	xbounds = 5
+	x_granularity = 750
+	x_grid = LinRange(-xbounds,xbounds,x_granularity) 
+	dx2 = x_grid[2]-x_grid[1]
+	
 	ti = 0.001
-	tf1 = 10
-	Nt1=300
-	tp1 = LinRange(ti,tf1,Nt1) 
-	ρ02 = intial.(x2,tp1[1]) # initial state of the energy density on the chosen grid
-end;
+	tf = 10
+	t_granularity = 300
+	t_grid = LinRange(ti,tf,t_granularity) 
 
-# ╔═╡ 4bb2c9b8-4e56-405b-ad2c-cda8827679ce
-plot(x2, ρ02)
+	# Generate our initial conditions (t=0) on our grid
+	ψ_0 = intial_exp.(x_grid,t_grid[1])
 
-# ╔═╡ a622d335-01ce-46d2-97ec-6a307f58d906
-begin
-	onex2 = one.(x2[1:end-1])
-	dxx = diagm(1=>onex2,-1=>onex2,0=>-2one.(x2))
+	# Set up our matrix for approximating our second derivative
+	onex2 = one.(x_grid[1:end-1])
+	dxx = diagm(1=>onex2,-1=>onex2,0=>-2one.(x_grid))
 	
-	# Rather than handle the edges properly, let's just zero the first and last rows. 
-	# We return to boundary conditions shortly.
-
-	# Fixed boundaries
 	dxx[1,1] = -1
 	dxx[end,end] = -1
 
-	potential = diagm(0=>x2.^2)
+	dxx ./= dx2^2
+
+	Dxx  = sparse(dxx)
+
+	# Generate the matrix for our potential (x^2)
+	potential = diagm(0=>x_grid.^2)
 
 	potential_mat = sparse(potential);
-end
-
-# ╔═╡ eca97e67-3907-42fb-85eb-f4223bb97164
-begin
-	dxx ./= dx2^2 # remember the differentials!
 	
-	# Factor of ~20 speed up by recasting this matrix in sparse form!
-	# we can group everything into one matrix:
-	Dxx  = sparse(dxx) 
-end
+end;
 
-# ╔═╡ 57723e76-6293-42b5-91a8-4f259ba929de
-begin
-
-	# We have already defined the system parameters and time tp
-	tspan1 = (ti,tf1)
-	dt1 = 1/20 			#you may need to play around here
-	alg1 = Vern6() 		#and here
-
-
-end
+# ╔═╡ 4bb2c9b8-4e56-405b-ad2c-cda8827679ce
+plot(x_grid, real(ψ_0))
 
 # ╔═╡ d8d02d62-7f3d-44eb-a0d5-b40ac492b7d4
 begin
@@ -100,9 +83,9 @@ begin
 
 	# Total_Mat = -(1/2).*Dxx + (1/2).*potential_mat
 
-	total_mat_full = -(1/2).*dxx + (1/2).*potential
+	H_SHM = -(1/2).*dxx + (1/2).*potential
 
-	σ, u = eigen(total_mat_full)
+	σ, u = eigen(H_SHM)
 	
 end
 
@@ -115,99 +98,51 @@ begin
 	# Plot eigenstates and eigenenergies
 
 	plot()
-	plot!(x2,u[:,eig],lw=1.5,c=:blue)
+	plot!(x_grid,u[:,eig],lw=1.5,c=:blue)
 	title!("Eigenenergy=$(σ[eig])")
 	xlabel!("x");ylabel!("Eigenenergies")
-	xlims!(-bounds,bounds)
+	xlims!(-xbounds,xbounds)
 	# ylims!(-1, 1)
-
-end
-
-# ╔═╡ 3c58e3d9-8167-4d72-b65b-a181c504c8a8
-begin
-
-	# Lets set up the system for our nonlinear equation, the Gross-Pitaevskii eqn
-
-	g = 1.0
-
-	function gpe(dρ,ρ,p,t)
-
-			# Dxx, potential_mat = p
-			# Try with normalising
-			to_be_normalised = (-1/2)*Dxx*ρ + g.*(abs.(ρ).^2).*ρ  
-		
-			normalised = 0.0
-			for i in 1:length(to_be_normalised)
-				normalised += dx2*to_be_normalised[i]
-			end
-		
-			dρ .= to_be_normalised./sqrt(abs(normalised))
-
-			# try without normalising
-			# dρ .= (-1/2)*Dxx*ρ + g*(abs(ρ)^2)*ρ
-		end 
 
 end
 
 # ╔═╡ 62210722-8c7d-4548-a3f4-977fc42cc422
 begin
+
+	# Set up and numerically solve the schrodinger equation for our SHM potential
 	
-	function schrod!(dρ,ρ,p,t)
+	function schrod_shm(dψ,ψ,p,t)
 
-			# Dxx, potential_mat = p
-			# Try with normalising
-			to_be_normalised = (-1/2)*Dxx*ρ + (1/2)*potential_mat*ρ  
-		
-			normalised = 0.0
-			for i in 1:length(to_be_normalised)
-				normalised += dx2*to_be_normalised[i]
-			end
-			dρ .= to_be_normalised./sqrt(abs(normalised))
+			dψ = -1.0*im*H_SHM 
 
-			# try without normalising
-			# dρ .= -(1/2)*Dxx*ρ + (1/2)*potential_mat*ρ
 		end 
 
-	prob1 = ODEProblem(schrod!,ρ02,tspan1)
+	alg1 = Vern6()
 
-	sol1 = solve(prob1,alg=alg1,saveat=tp1)
+	schrod_shm_prob = ODEProblem(schrod_shm,ψ_0,(ti, tf))
+
+	sol_shm = solve(schrod_shm_prob,alg=alg1,saveat=t_grid)
 
 end
 
-# ╔═╡ b982e80c-e619-4778-be21-4181fa15dc71
-tp1
+# ╔═╡ 7056bb81-d3e5-40ec-9206-6f443a7dd078
+@bind t_shm Slider(1:length(t_grid))
 
-# ╔═╡ d315c9d2-a8e5-414a-81de-7977dbb292dc
-@bind i Slider(eachindex(tp1))
+# ╔═╡ bf339a0a-46bf-4df3-9709-a226e85db97d
+sol_shm[:,t_shm]
 
-# ╔═╡ a16860c3-3620-4a5b-a829-cabda2967ab6
+# ╔═╡ 01455290-a711-4336-9a1f-529ce7e29de9
 begin
+
+	# Plot the real and imaginary parts of the numerical solutions to our SHM potential
+
 	plot()
-	plot!(x2,sol1[i][:],lw=1.5,c=:blue)
-	title!("t=$(round(tp1[i],sigdigits=3)) s")
-	xlabel!("x");ylabel!("Schrod")
-	ylims!(-10, 10)
-end
+	plot!(x_grid,real(sol_shm[:,t_shm]),lw=1.5,c=:blue)
+	plot!(x_grid,imag(sol_shm[:,t_shm]),lw=1.5,c=:red)
+	title!("Time=$(t_grid[t_shm])")
+	xlabel!("x");ylabel!("Psi")
+	xlims!(-xbounds,xbounds)
 
-# ╔═╡ f1ee2c87-582b-4f92-bf9d-b417edd09f04
-begin
-
-	probgpe = ODEProblem(gpe,ρ02,tspan1)
-
-	solgpe = solve(probgpe,alg=alg1,saveat=tp1)
-	
-end
-
-# ╔═╡ fafb27e3-1826-4c09-b745-2dc7fd9f93af
-@bind i2 Slider(eachindex(tp1))
-
-# ╔═╡ 8dcd97a7-35ae-42ca-a923-3244d58c8628
-begin
-	plot()
-	plot!(x2,solgpe[i2][:],lw=1.5,c=:blue)
-	title!("t=$(round(tp1[i2],sigdigits=3)) s")
-	xlabel!("x");ylabel!("GPE")
-	ylims!(-10, 10)
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -2594,19 +2529,12 @@ version = "1.4.1+2"
 # ╠═2fa6317b-a540-4106-908e-41af696b30b1
 # ╠═f8d3ed5e-5789-4b7f-ba06-fa0d6a336c1d
 # ╠═4bb2c9b8-4e56-405b-ad2c-cda8827679ce
-# ╠═a622d335-01ce-46d2-97ec-6a307f58d906
-# ╠═eca97e67-3907-42fb-85eb-f4223bb97164
-# ╠═57723e76-6293-42b5-91a8-4f259ba929de
 # ╠═d8d02d62-7f3d-44eb-a0d5-b40ac492b7d4
 # ╠═aa473863-17c6-4844-bd31-d2c6628599cc
 # ╠═58ea405a-73fd-42c3-9a99-0f98e1a9f90c
-# ╠═3c58e3d9-8167-4d72-b65b-a181c504c8a8
 # ╠═62210722-8c7d-4548-a3f4-977fc42cc422
-# ╠═b982e80c-e619-4778-be21-4181fa15dc71
-# ╠═d315c9d2-a8e5-414a-81de-7977dbb292dc
-# ╠═a16860c3-3620-4a5b-a829-cabda2967ab6
-# ╠═f1ee2c87-582b-4f92-bf9d-b417edd09f04
-# ╠═fafb27e3-1826-4c09-b745-2dc7fd9f93af
-# ╠═8dcd97a7-35ae-42ca-a923-3244d58c8628
+# ╠═bf339a0a-46bf-4df3-9709-a226e85db97d
+# ╠═7056bb81-d3e5-40ec-9206-6f443a7dd078
+# ╠═01455290-a711-4336-9a1f-529ce7e29de9
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
