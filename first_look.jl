@@ -41,7 +41,7 @@ begin
 		return ℯ^(-x^2)/sqrt(π) + 0.0im
 	end
 	
-	ti = 0.001
+	ti = 0.0
 	tf = 5
 	t_granularity = 500
 	t_grid = LinRange(ti,tf,t_granularity) 
@@ -86,7 +86,7 @@ begin
 end;
 
 # ╔═╡ 2386cdc6-13fc-4e69-b607-053065f5af41
-H_SHM
+H_SHM_sparse = sparse(H_SHM)
 
 # ╔═╡ aa473863-17c6-4844-bd31-d2c6628599cc
 @bind eig Slider(1:length(σ))
@@ -112,15 +112,15 @@ begin
 
 	# dψ = Array{Complex{Float64}};
 	
-	function schrod_shm(dψ,ψ,p,t)
+	function schrod_shm!(dψ,ψ,p,t)
 
-			dψ = -1.0*im * H_SHM * ψ
+			dψ = -(1.0*im) .*H_SHM_sparse * ψ
 
 		end 
 
 	alg1 = Vern6()
 
-	schrod_shm_prob = ODEProblem(schrod_shm,ψ_0,(ti, tf))
+	schrod_shm_prob = ODEProblem(schrod_shm!,ψ_0,(ti, tf))
 
 	sol_shm = solve(schrod_shm_prob,alg=alg1,saveat=t_grid)
 
