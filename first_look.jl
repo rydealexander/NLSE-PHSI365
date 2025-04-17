@@ -38,11 +38,11 @@ begin
 	dx2 = x_grid[2]-x_grid[1]
 
 	function intial_exp(x,t)
-		return ℯ^(-x^2) + 0.0im
+		return ℯ^(-x^2)/sqrt(π) + 0.0im
 	end
 	
 	ti = 0.001
-	tf = 10
+	tf = 5
 	t_granularity = 300
 	t_grid = LinRange(ti,tf,t_granularity) 
 
@@ -127,7 +127,7 @@ begin
 end;
 
 # ╔═╡ d02f81fe-5ee3-47ef-aa3b-e8388c4dd92d
-sol_shm
+typeof.(sol_shm[1])
 
 # ╔═╡ 7056bb81-d3e5-40ec-9206-6f443a7dd078
 @bind t_shm Slider(1:length(t_grid))
