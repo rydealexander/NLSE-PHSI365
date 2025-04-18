@@ -38,7 +38,7 @@ begin
 	dx2 = x_grid[2]-x_grid[1]
 
 	function initial_exp(x,t)
-		return ℯ^(-(x/2)^2)/sqrt(π) + 0.0im
+		return ℯ^(-(x)^2) + 0.0im
 	end
 	
 	ti = 0.0
@@ -53,8 +53,8 @@ begin
 	onex2 = one.(x_grid[1:end-1])
 	dxx = diagm(1=>onex2,-1=>onex2,0=>-2one.(x_grid))
 	
-	# dxx[1,1] = -1
-	# dxx[end,end] = -1
+	dxx[1,1] = -1
+	dxx[end,end] = -1
 
 	dxx ./= dx2^2
 
@@ -108,8 +108,6 @@ end
 begin
 
 	# Set up and numerically solve the schrodinger equation for our SHM potential
-
-	# dψ = Array{Complex{Float64}};
 	
 	function schrod_shm!(ψ,p,t)
 
@@ -137,6 +135,68 @@ begin
 	plot!(x_grid,real(sol_shm[:,t_shm]),lw=1.5,c=:blue)
 	plot!(x_grid,imag(sol_shm[:,t_shm]),lw=1.5,c=:red)
 	title!("Time=$(t_grid[t_shm])")
+	xlabel!("x");ylabel!("Psi")
+	xlims!(-xbounds,xbounds)
+
+end
+
+# ╔═╡ 5f329df0-34d2-4583-b14a-c333d74854ed
+begin
+
+	# New timescale for GPE
+	tf_gpe = 20
+	
+	t_grid_gpe = LinRange(ti,tf_gpe,t_granularity) 
+
+	# Set up GPE variables
+	
+	H_GPE = -(0.5).*dxx
+
+	H_GPE_Sparse = sparse(H_GPE)
+
+	g = -1
+
+	# Initial conditions
+
+	function gpe_initial(x)
+
+		return sech(x) + 0.0im
+
+	end
+
+	ψ_g_0 = gpe_initial.(x_grid)
+
+end
+
+# ╔═╡ 8b731ac3-1142-4343-9794-daff89f6552c
+begin
+
+	# Try Gross Pitaevskii instead
+	
+	function GPE(ψ,p,t)
+
+			return -(1.0im)*H_GPE_Sparse*ψ + g*(abs.(ψ).^2).*ψ
+
+		end 
+
+	gpe_prob = ODEProblem(GPE,ψ_g_0,(ti, tf_gpe))
+
+	sol_gpe = solve(gpe_prob,alg=alg1,saveat=t_grid_gpe)
+
+end
+
+# ╔═╡ 2d161190-8b99-4d84-8a69-ffdbdf9f03c5
+@bind t_gpe Slider(1:length(t_grid_gpe))
+
+# ╔═╡ 9b25dad5-b855-43c5-a771-4bb73ecb5a07
+begin
+
+	# Plot the real and imaginary parts of the numerical solutions to our SHM potential
+
+	plot()
+	plot!(x_grid,real(sol_gpe[:,t_gpe]),lw=1.5,c=:blue)
+	# plot!(x_grid,imag(sol_gpe[:,t_gpe]),lw=1.5,c=:red)
+	title!("Time=$(t_grid_gpe[t_gpe])")
 	xlabel!("x");ylabel!("Psi")
 	xlims!(-xbounds,xbounds)
 
@@ -2531,5 +2591,9 @@ version = "1.4.1+2"
 # ╠═62210722-8c7d-4548-a3f4-977fc42cc422
 # ╠═7056bb81-d3e5-40ec-9206-6f443a7dd078
 # ╠═01455290-a711-4336-9a1f-529ce7e29de9
+# ╠═5f329df0-34d2-4583-b14a-c333d74854ed
+# ╠═8b731ac3-1142-4343-9794-daff89f6552c
+# ╠═2d161190-8b99-4d84-8a69-ffdbdf9f03c5
+# ╠═9b25dad5-b855-43c5-a771-4bb73ecb5a07
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
