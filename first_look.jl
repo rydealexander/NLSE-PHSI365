@@ -144,7 +144,7 @@ end
 begin
 
 	# New timescale for GPE
-	tf_gpe = 20
+	tf_gpe = 50
 	
 	t_grid_gpe = LinRange(ti,tf_gpe,t_granularity) 
 
