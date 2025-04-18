@@ -109,9 +109,9 @@ begin
 
 	# Set up and numerically solve the schrodinger equation for our SHM potential
 	
-	function schrod_shm!(ψ,p,t)
+	function schrod_shm!(dψ,ψ,p,t)
 
-			return -(1.0im)*H_SHM_sparse * ψ
+			dψ .= -(1.0im)*H_SHM_sparse * ψ
 
 		end 
 
@@ -172,6 +172,8 @@ end
 begin
 
 	# Try Gross Pitaevskii instead
+
+	# dψ_gpe = zeros(ComplexF64, length(x_grid), length(t_grid_gpe))
 	
 	function GPE(ψ,p,t)
 
