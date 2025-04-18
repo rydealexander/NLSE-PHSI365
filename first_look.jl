@@ -197,7 +197,7 @@ begin
 
 	plot()
 	plot!(x_grid,real(sol_gpe[:,t_gpe]),lw=1.5,c=:blue)
-	# plot!(x_grid,imag(sol_gpe[:,t_gpe]),lw=1.5,c=:red)
+	plot!(x_grid,imag(sol_gpe[:,t_gpe]),lw=1.5,c=:red)
 	title!("Time=$(t_grid_gpe[t_gpe])")
 	xlabel!("x");ylabel!("Psi")
 	xlims!(-xbounds,xbounds)
@@ -241,7 +241,7 @@ end
 begin
 	# Plot
 	plot()
-	plot!(x_grid,real(sol_soliton[:,t_soliton]),lw=1.5,c=:blue)
+	plot!(x_grid,abs.(sol_soliton[:,t_soliton]).^2,lw=1.5,c=:blue)
 	# plot!(x_grid,imag(sol_gpe[:,t_gpe]),lw=1.5,c=:red)
 	title!("Time=$(t_grid_gpe[t_soliton])")
 	xlabel!("x");ylabel!("Psi")
