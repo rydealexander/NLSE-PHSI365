@@ -33,21 +33,21 @@ begin
 	# Set up our x and t grids
 	
 	xbounds = 5
-	x_granularity = 500
+	x_granularity = 1000
 	x_grid = LinRange(-xbounds,xbounds,x_granularity) 
 	dx2 = x_grid[2]-x_grid[1]
 
-	function intial_exp(x,t)
-		return ℯ^(-x^2)/sqrt(π) + 0.0im
+	function initial_exp(x,t)
+		return cos(x*π/(2*xbounds)) + 0.0im
 	end
 	
 	ti = 0.0
-	tf = 5
-	t_granularity = 500
+	tf = 15
+	t_granularity = 1000
 	t_grid = LinRange(ti,tf,t_granularity) 
 
 	# Generate our initial conditions (t=0) on our grid
-	ψ_0 = intial_exp.(x_grid,t_grid[1])
+	ψ_0 = initial_exp.(x_grid,t_grid[1])
 
 	# Set up our matrix for approximating our second derivative
 	onex2 = one.(x_grid[1:end-1])
@@ -79,14 +79,13 @@ begin
 
 	# Total_Mat = -(1/2).*Dxx + (1/2).*potential_mat
 
-	H_SHM = -(1/2).*dxx + (1/2).*potential
+	H_SHM = -(0.5).*dxx + (0.5).*potential
 
 	σ, u = eigen(H_SHM)
+
+	H_SHM_sparse = sparse(H_SHM)
 	
 end;
-
-# ╔═╡ 2386cdc6-13fc-4e69-b607-053065f5af41
-H_SHM_sparse = sparse(H_SHM)
 
 # ╔═╡ aa473863-17c6-4844-bd31-d2c6628599cc
 @bind eig Slider(1:length(σ))
@@ -112,9 +111,9 @@ begin
 
 	# dψ = Array{Complex{Float64}};
 	
-	function schrod_shm!(dψ,ψ,p,t)
+	function schrod_shm!(ψ,p,t)
 
-			dψ = -(1.0*im) .*H_SHM_sparse * ψ
+			return -(1.0im)*H_SHM_sparse * ψ
 
 		end 
 
@@ -125,9 +124,6 @@ begin
 	sol_shm = solve(schrod_shm_prob,alg=alg1,saveat=t_grid)
 
 end;
-
-# ╔═╡ d02f81fe-5ee3-47ef-aa3b-e8388c4dd92d
-sol_shm
 
 # ╔═╡ 7056bb81-d3e5-40ec-9206-6f443a7dd078
 @bind t_shm Slider(1:length(t_grid))
@@ -2530,11 +2526,9 @@ version = "1.4.1+2"
 # ╠═f8d3ed5e-5789-4b7f-ba06-fa0d6a336c1d
 # ╠═4bb2c9b8-4e56-405b-ad2c-cda8827679ce
 # ╠═d8d02d62-7f3d-44eb-a0d5-b40ac492b7d4
-# ╠═2386cdc6-13fc-4e69-b607-053065f5af41
 # ╠═aa473863-17c6-4844-bd31-d2c6628599cc
 # ╠═58ea405a-73fd-42c3-9a99-0f98e1a9f90c
 # ╠═62210722-8c7d-4548-a3f4-977fc42cc422
-# ╠═d02f81fe-5ee3-47ef-aa3b-e8388c4dd92d
 # ╠═7056bb81-d3e5-40ec-9206-6f443a7dd078
 # ╠═01455290-a711-4336-9a1f-529ce7e29de9
 # ╟─00000000-0000-0000-0000-000000000001
