@@ -175,9 +175,9 @@ begin
 
 	# dψ_gpe = zeros(ComplexF64, length(x_grid), length(t_grid_gpe))
 	
-	function GPE(ψ,p,t)
+	function GPE(dψ,ψ,p,t)
 
-			return -(1.0im)*H_GPE_Sparse*ψ + g*(abs.(ψ).^2).*ψ
+			dψ .= -(1.0im)*H_GPE_Sparse*ψ + g*(abs.(ψ).^2).*ψ
 
 		end 
 
@@ -202,6 +202,50 @@ begin
 	xlabel!("x");ylabel!("Psi")
 	xlims!(-xbounds,xbounds)
 
+end
+
+# ╔═╡ 64a9f143-bd8f-4458-9a0c-6895264b5ac8
+begin
+
+	# Now do for bright soliton
+
+	# Initial conditions
+
+	N = 20
+
+	ξ = 2/(abs(g)*N)
+
+	# Not sure what to put here so just put one
+	k = 1
+
+	# Bright soliton
+	function bright_soliton_initial(x)
+
+		return sqrt(N/(2*ξ))*sech(x/ξ)*ℯ^(im*k*x)
+
+	end
+
+	# Setup problem and solve it
+	ψ_soliton_0 = bright_soliton_initial.(x_grid)
+
+	soliton_prob = ODEProblem(GPE,ψ_soliton_0,(ti, tf_gpe))
+
+	sol_soliton = solve(soliton_prob,alg=alg1,saveat=t_grid_gpe)
+
+end
+
+# ╔═╡ 8a1d209a-222a-473d-88fa-59df6e7f5fd7
+@bind t_soliton Slider(1:length(t_grid_gpe))
+
+# ╔═╡ af8e1724-f606-45de-aaa6-a7db2ad0a42f
+begin
+	# Plot
+	plot()
+	plot!(x_grid,real(sol_soliton[:,t_soliton]),lw=1.5,c=:blue)
+	# plot!(x_grid,imag(sol_gpe[:,t_gpe]),lw=1.5,c=:red)
+	title!("Time=$(t_grid_gpe[t_soliton])")
+	xlabel!("x");ylabel!("Psi")
+	xlims!(-xbounds,xbounds)
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -2597,5 +2641,8 @@ version = "1.4.1+2"
 # ╠═8b731ac3-1142-4343-9794-daff89f6552c
 # ╠═2d161190-8b99-4d84-8a69-ffdbdf9f03c5
 # ╠═9b25dad5-b855-43c5-a771-4bb73ecb5a07
+# ╠═64a9f143-bd8f-4458-9a0c-6895264b5ac8
+# ╠═8a1d209a-222a-473d-88fa-59df6e7f5fd7
+# ╠═af8e1724-f606-45de-aaa6-a7db2ad0a42f
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
