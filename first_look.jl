@@ -38,7 +38,7 @@ begin
 	dx2 = x_grid[2]-x_grid[1]
 
 	function initial_exp(x,t)
-		return ℯ^(-(x)^2) + 0.0im
+		return ℯ^(-(x-2)^2)/2 + 0.0im
 	end
 	
 	ti = 0.0
