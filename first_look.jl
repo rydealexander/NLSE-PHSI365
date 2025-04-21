@@ -38,7 +38,7 @@ begin
 	dx2 = x_grid[2]-x_grid[1]
 
 	function initial_exp(x,t)
-		return ℯ^(-(x-2)^2)/2 + 0.0im
+		return ℯ^(-(x)^2)/2 + 0.0im
 	end
 	
 	ti = 0.0
@@ -199,7 +199,7 @@ begin
 	title!("Time=$(t_grid_gpe[t_gpe])")
 	xlabel!("x");ylabel!("Psi")
 	xlims!(-xbounds,xbounds)
-	ylims!(-0.25,1)
+	ylims!(-1,1)
 
 end
 
