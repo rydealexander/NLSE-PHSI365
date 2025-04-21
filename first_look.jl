@@ -67,9 +67,6 @@ begin
 	
 end;
 
-# ╔═╡ 4bb2c9b8-4e56-405b-ad2c-cda8827679ce
-plot(x_grid, real(ψ_0))
-
 # ╔═╡ d8d02d62-7f3d-44eb-a0d5-b40ac492b7d4
 begin
 
@@ -178,7 +175,7 @@ begin
 	
 	function GPE(dψ,ψ,p,t)
 
-			dψ .= -(1.0im)*H_GPE_Sparse*ψ + g*(abs.(ψ).^2).*ψ
+			dψ .= -(1.0im)*H_GPE_Sparse*ψ - (1.0im)g*(abs.(ψ).^2).*ψ
 
 		end 
 
@@ -223,7 +220,7 @@ begin
 	# Bright soliton
 	function bright_soliton_initial(x)
 
-		return sqrt(N/(2*ξ))*sech(x/ξ)*ℯ^(im*k*x)
+		return sqrt(N/(2*ξ))*sech(x/ξ)*ℯ^(im*k*x) + sqrt(N/(2*ξ))*sech((x-2)/ξ)*ℯ^(-im*k*x)
 
 	end
 
@@ -2632,7 +2629,6 @@ version = "1.4.1+2"
 # ╟─8b6118e4-17fd-11f0-32f5-dd5270d18be9
 # ╠═a5d3665b-0a31-4663-8c25-377e6677593c
 # ╠═f8d3ed5e-5789-4b7f-ba06-fa0d6a336c1d
-# ╠═4bb2c9b8-4e56-405b-ad2c-cda8827679ce
 # ╠═d8d02d62-7f3d-44eb-a0d5-b40ac492b7d4
 # ╠═aa473863-17c6-4844-bd31-d2c6628599cc
 # ╠═58ea405a-73fd-42c3-9a99-0f98e1a9f90c
