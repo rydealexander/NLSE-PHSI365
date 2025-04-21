@@ -137,6 +137,7 @@ begin
 	title!("Time=$(t_grid[t_shm])")
 	xlabel!("x");ylabel!("Psi")
 	xlims!(-xbounds,xbounds)
+	ylims!(-1,1)
 
 end
 
@@ -144,7 +145,7 @@ end
 begin
 
 	# New timescale for GPE
-	tf_gpe = 50
+	tf_gpe = 100
 	
 	t_grid_gpe = LinRange(ti,tf_gpe,t_granularity) 
 
@@ -201,6 +202,7 @@ begin
 	title!("Time=$(t_grid_gpe[t_gpe])")
 	xlabel!("x");ylabel!("Psi")
 	xlims!(-xbounds,xbounds)
+	ylims!(-0.25,1)
 
 end
 
