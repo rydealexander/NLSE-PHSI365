@@ -141,11 +141,6 @@ end
 # ╔═╡ 5f329df0-34d2-4583-b14a-c333d74854ed
 begin
 
-	# New timescale for GPE
-	tf_gpe = 100
-	
-	t_grid_gpe = LinRange(ti,tf_gpe,t_granularity) 
-
 	# Set up GPE variables
 	
 	H_GPE = -(0.5).*dxx
@@ -158,13 +153,13 @@ begin
 
 	function gpe_initial(x)
 
-		return sech(x) + 0.0im
+		return 2*sech(x) + 0.0im
 
 	end
 
 	ψ_g_0 = gpe_initial.(x_grid)
 
-end
+end; nothing
 
 # ╔═╡ 8b731ac3-1142-4343-9794-daff89f6552c
 begin
@@ -175,18 +170,37 @@ begin
 	
 	function GPE(dψ,ψ,p,t)
 
-			dψ .= -(1.0im)*H_GPE_Sparse*ψ - (1.0im)g*(abs.(ψ).^2).*ψ
+			dψ .= -(1.0im)*H_GPE_Sparse*ψ - (1.0im)g*(abs2.(ψ)).*ψ
 
 		end 
 
+	# New timescale for GPE
+	tf_gpe = 8
+	
+	t_grid_gpe = LinRange(ti,tf_gpe,t_granularity) 
+	
 	gpe_prob = ODEProblem(GPE,ψ_g_0,(ti, tf_gpe))
 
 	sol_gpe = solve(gpe_prob,alg=alg1,saveat=t_grid_gpe)
 
-end
+end; nothing
 
 # ╔═╡ 2d161190-8b99-4d84-8a69-ffdbdf9f03c5
 @bind t_gpe Slider(1:length(t_grid_gpe))
+
+# ╔═╡ 2b4c03c3-5c2c-460b-9e9c-a205b965a991
+begin
+
+	# Plot the real and imaginary parts of the numerical solutions to our SHM potential
+
+	plot()
+	plot!(x_grid,abs2.(sol_gpe[:,t_gpe]),lw=1.5,c=:blue)
+	title!("Time=$(t_grid_gpe[t_gpe])")
+	xlabel!("x");ylabel!("Psi")
+	xlims!(-xbounds,xbounds)
+	ylims!(-50,50)
+
+end
 
 # ╔═╡ 9b25dad5-b855-43c5-a771-4bb73ecb5a07
 begin
@@ -199,7 +213,7 @@ begin
 	title!("Time=$(t_grid_gpe[t_gpe])")
 	xlabel!("x");ylabel!("Psi")
 	xlims!(-xbounds,xbounds)
-	ylims!(-1,1)
+	ylims!(-10,10)
 
 end
 
@@ -207,6 +221,11 @@ end
 begin
 
 	# Now do for bright soliton
+
+	#
+	tf_gpe_soliton = 15
+	
+	tf_gpe_soliton_grid = LinRange(ti,tf_gpe_soliton,t_granularity) 
 
 	# Initial conditions
 
@@ -220,18 +239,18 @@ begin
 	# Bright soliton
 	function bright_soliton_initial(x)
 
-		return sqrt(N/(2*ξ))*sech(x/ξ)*ℯ^(im*k*x) + sqrt(N/(2*ξ))*sech((x-2)/ξ)*ℯ^(-im*k*x)
+		return sqrt(N/(2*ξ))*sech(x/ξ)*ℯ^(2im*k*x) + sqrt(N/(2*ξ))*sech((x-2)/ξ)*ℯ^(-2im*k*x)
 
 	end
 
 	# Setup problem and solve it
 	ψ_soliton_0 = bright_soliton_initial.(x_grid)
 
-	soliton_prob = ODEProblem(GPE,ψ_soliton_0,(ti, tf_gpe))
+	soliton_prob = ODEProblem(GPE,ψ_soliton_0,(ti, tf_gpe_soliton))
 
-	sol_soliton = solve(soliton_prob,alg=alg1,saveat=t_grid_gpe)
+	sol_soliton = solve(soliton_prob,alg=alg1,saveat=tf_gpe_soliton_grid)
 
-end
+end; nothing
 
 # ╔═╡ 8a1d209a-222a-473d-88fa-59df6e7f5fd7
 @bind t_soliton Slider(1:length(t_grid_gpe))
@@ -2637,7 +2656,8 @@ version = "1.4.1+2"
 # ╠═01455290-a711-4336-9a1f-529ce7e29de9
 # ╠═5f329df0-34d2-4583-b14a-c333d74854ed
 # ╠═8b731ac3-1142-4343-9794-daff89f6552c
-# ╠═2d161190-8b99-4d84-8a69-ffdbdf9f03c5
+# ╟─2d161190-8b99-4d84-8a69-ffdbdf9f03c5
+# ╠═2b4c03c3-5c2c-460b-9e9c-a205b965a991
 # ╠═9b25dad5-b855-43c5-a771-4bb73ecb5a07
 # ╠═64a9f143-bd8f-4458-9a0c-6895264b5ac8
 # ╠═8a1d209a-222a-473d-88fa-59df6e7f5fd7
