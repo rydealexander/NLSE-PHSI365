@@ -53,8 +53,12 @@ begin
 	onex2 = one.(x_grid[1:end-1])
 	dxx = diagm(1=>onex2,-1=>onex2,0=>-2one.(x_grid))
 	
-	dxx[1,1] = -1
-	dxx[end,end] = -1
+	# dxx[1,1] = -1
+	# dxx[end,end] = -1
+
+	dxx[1,end] = 1
+
+	dxx[end,1] = 1
 
 	dxx ./= dx2^2
 
@@ -66,6 +70,9 @@ begin
 	potential_mat = sparse(potential);
 	
 end;
+
+# ╔═╡ ee618bb4-487d-480b-a37b-4381b32a0f66
+dxx
 
 # ╔═╡ d8d02d62-7f3d-44eb-a0d5-b40ac492b7d4
 begin
@@ -147,13 +154,13 @@ begin
 
 	H_GPE_Sparse = sparse(H_GPE)
 
-	g = -1
+	g = 1
 
 	# Initial conditions
 
 	function gpe_initial(x)
 
-		return 2*sech(x) + 0.0im
+		return 4*sech(x) + 0.0im
 
 	end
 
@@ -170,7 +177,7 @@ begin
 	
 	function GPE(dψ,ψ,p,t)
 
-			dψ .= -(1.0im)*H_GPE_Sparse*ψ - (1.0im)g*(abs2.(ψ)).*ψ
+			dψ .= -(1.0im)*H_GPE_Sparse*ψ + (1.0im)g*(abs2.(ψ)).*ψ
 
 		end 
 
@@ -2648,6 +2655,7 @@ version = "1.4.1+2"
 # ╟─8b6118e4-17fd-11f0-32f5-dd5270d18be9
 # ╠═a5d3665b-0a31-4663-8c25-377e6677593c
 # ╠═f8d3ed5e-5789-4b7f-ba06-fa0d6a336c1d
+# ╠═ee618bb4-487d-480b-a37b-4381b32a0f66
 # ╠═d8d02d62-7f3d-44eb-a0d5-b40ac492b7d4
 # ╠═aa473863-17c6-4844-bd31-d2c6628599cc
 # ╠═58ea405a-73fd-42c3-9a99-0f98e1a9f90c
