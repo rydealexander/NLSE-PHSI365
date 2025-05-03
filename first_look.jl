@@ -247,7 +247,7 @@ begin
 	# Bright soliton
 	function bright_soliton_initial(x)
 
-		return sqrt(N/(2*ξ))*sech(x/ξ)*ℯ^(2im*k*x) + sqrt(N/(2*ξ))*sech((x-2)/ξ)*ℯ^(-2im*k*x)
+		return sqrt(N/(2*ξ))*sech(x/ξ)*ℯ^(2im*k*x) + sqrt(N/(2*ξ))*sech((x-2)/ξ)*ℯ^(-2im*k*(x-2))
 
 	end
 
@@ -277,12 +277,23 @@ end
 # ╔═╡ 625a55f7-db08-402c-87c4-0a86f2d95ead
 begin
 
-	# Calculate energy at given time
+	# Calculate energy at given time - below is JUST KINETIC - NEED INTERACTION
 
 	# Numerically integrate over ψ*Ĥψ
 	E = sol_soliton[:,t_soliton]'H_GPE_Sparse*sol_soliton[:,t_soliton]
 
+	function Expectation(t)
+		return sol_soliton[:,t]'H_GPE_Sparse*sol_soliton[:,t]
+	end
 
+
+end
+
+# ╔═╡ 75a23ac5-9ca2-4a5d-9dc4-f57488534104
+begin
+
+	plot(1:length(t_grid_gpe), x->Expectation(x))
+	
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -2683,5 +2694,6 @@ version = "1.4.1+2"
 # ╠═8a1d209a-222a-473d-88fa-59df6e7f5fd7
 # ╠═af8e1724-f606-45de-aaa6-a7db2ad0a42f
 # ╠═625a55f7-db08-402c-87c4-0a86f2d95ead
+# ╠═75a23ac5-9ca2-4a5d-9dc4-f57488534104
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
