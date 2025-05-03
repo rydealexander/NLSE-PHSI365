@@ -52,13 +52,14 @@ begin
 	# Set up our matrix for approximating our second derivative
 	onex2 = one.(x_grid[1:end-1])
 	dxx = diagm(1=>onex2,-1=>onex2,0=>-2one.(x_grid))
-	
+
+	# Free boundaries
 	# dxx[1,1] = -1
 	# dxx[end,end] = -1
 
-	dxx[1,end] = 1
-
-	dxx[end,1] = 1
+	# Periodic boundaries
+	# dxx[1,end] = 1
+	# dxx[end,1] = 1
 
 	dxx ./= dx2^2
 
@@ -271,6 +272,17 @@ begin
 	title!("Time=$(t_grid_gpe[t_soliton])")
 	xlabel!("x");ylabel!("Psi")
 	xlims!(-xbounds,xbounds)
+end
+
+# ╔═╡ 625a55f7-db08-402c-87c4-0a86f2d95ead
+begin
+
+	# Calculate energy at given time
+
+	# Numerically integrate over ψ*Ĥψ
+	E = sol_soliton[:,t_soliton]'H_GPE_Sparse*sol_soliton[:,t_soliton]
+
+
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -2670,5 +2682,6 @@ version = "1.4.1+2"
 # ╠═64a9f143-bd8f-4458-9a0c-6895264b5ac8
 # ╠═8a1d209a-222a-473d-88fa-59df6e7f5fd7
 # ╠═af8e1724-f606-45de-aaa6-a7db2ad0a42f
+# ╠═625a55f7-db08-402c-87c4-0a86f2d95ead
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
