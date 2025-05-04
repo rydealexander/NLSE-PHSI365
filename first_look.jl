@@ -260,7 +260,7 @@ begin
 	# Setup problem and solve it
 	# ψ_soliton_0 = bright_soliton_initial.(x_grid)
 
-	ψ_soliton_0 = bright_solitons_shift.(x_grid, k, ξ, N, 0)
+	ψ_soliton_0 = bright_solitons_shift.(x_grid, k, ξ, N, π)
 
 	soliton_prob = ODEProblem(GPE,ψ_soliton_0,(ti, tf_gpe_soliton))
 
@@ -283,7 +283,7 @@ begin
 end
 
 # ╔═╡ ba917a95-bfbf-4d96-a990-392e6fd55f78
-# Think about doing heatmap plots of collisions to investigate behaviour, like in book
+# Think about doing heatmap plots of collisions to investigate behaviour, like in book and Williams code
 
 # ╔═╡ 625a55f7-db08-402c-87c4-0a86f2d95ead
 begin
