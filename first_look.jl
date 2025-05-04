@@ -183,7 +183,7 @@ begin
 		end 
 
 	# New timescale for GPE
-	tf_gpe = 8
+	tf_gpe = 15
 	
 	t_grid_gpe = LinRange(ti,tf_gpe,t_granularity) 
 	
@@ -231,7 +231,7 @@ begin
 	# Now do for bright soliton
 
 	#
-	tf_gpe_soliton = 15
+	tf_gpe_soliton = 1
 	
 	tf_gpe_soliton_grid = LinRange(ti,tf_gpe_soliton,t_granularity) 
 
@@ -247,12 +247,20 @@ begin
 	# Bright soliton
 	function bright_soliton_initial(x)
 
-		return sqrt(N/(2*ξ))*sech(x/ξ)*ℯ^(2im*k*x) + sqrt(N/(2*ξ))*sech((x-2)/ξ)*ℯ^(-2im*k*(x-2))
+		return sqrt(N/(2*ξ))*sech((x+1)/ξ)*ℯ^(im*k*x) + sqrt(N/(2*ξ))*sech((x-1)/ξ)*ℯ^(-im*k*x)*ℯ^(im*π/2)
+
+	end
+
+	function bright_solitons_shift(x,k,ξ, N, phase_shift)
+
+		return sqrt(N/(2*ξ))*(sech((x+1)/ξ)*ℯ^(im*k*x) + sech((x-1)/ξ)*ℯ^(-im*k*x)*ℯ^(im*phase_shift))
 
 	end
 
 	# Setup problem and solve it
-	ψ_soliton_0 = bright_soliton_initial.(x_grid)
+	# ψ_soliton_0 = bright_soliton_initial.(x_grid)
+
+	ψ_soliton_0 = bright_solitons_shift.(x_grid, k, ξ, N, 0)
 
 	soliton_prob = ODEProblem(GPE,ψ_soliton_0,(ti, tf_gpe_soliton))
 
@@ -274,6 +282,9 @@ begin
 	xlims!(-xbounds,xbounds)
 end
 
+# ╔═╡ ba917a95-bfbf-4d96-a990-392e6fd55f78
+# Think about doing heatmap plots of collisions to investigate behaviour, like in book
+
 # ╔═╡ 625a55f7-db08-402c-87c4-0a86f2d95ead
 begin
 
@@ -292,7 +303,7 @@ end
 # ╔═╡ 75a23ac5-9ca2-4a5d-9dc4-f57488534104
 begin
 
-	plot(1:length(t_grid_gpe), x->Expectation(x))
+	# plot(1:length(t_grid_gpe), x->Expectation(x))
 	
 end
 
@@ -2693,6 +2704,7 @@ version = "1.4.1+2"
 # ╠═64a9f143-bd8f-4458-9a0c-6895264b5ac8
 # ╠═8a1d209a-222a-473d-88fa-59df6e7f5fd7
 # ╠═af8e1724-f606-45de-aaa6-a7db2ad0a42f
+# ╠═ba917a95-bfbf-4d96-a990-392e6fd55f78
 # ╠═625a55f7-db08-402c-87c4-0a86f2d95ead
 # ╠═75a23ac5-9ca2-4a5d-9dc4-f57488534104
 # ╟─00000000-0000-0000-0000-000000000001
