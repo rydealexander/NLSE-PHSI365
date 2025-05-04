@@ -260,7 +260,7 @@ begin
 	# Setup problem and solve it
 	# ψ_soliton_0 = bright_soliton_initial.(x_grid)
 
-	ψ_soliton_0 = bright_solitons_shift.(x_grid, k, ξ, N, π)
+	ψ_soliton_0 = bright_solitons_shift.(x_grid, k, ξ, N, 0)
 
 	soliton_prob = ODEProblem(GPE,ψ_soliton_0,(ti, tf_gpe_soliton))
 
@@ -288,15 +288,15 @@ end
 # ╔═╡ 625a55f7-db08-402c-87c4-0a86f2d95ead
 begin
 
-	# Calculate energy at given time - below is JUST KINETIC - NEED INTERACTION
+	# Calculate energy at given time - below is JUST KINETIC - NEED INTERACTION - SEE BOOK
 
 	# Numerically integrate over ψ*Ĥψ
-	E = sol_soliton[:,t_soliton]'H_GPE_Sparse*sol_soliton[:,t_soliton]
 
 	function Expectation(t)
 		return sol_soliton[:,t]'H_GPE_Sparse*sol_soliton[:,t]
 	end
 
+	Expectation(t_soliton)
 
 end
 
