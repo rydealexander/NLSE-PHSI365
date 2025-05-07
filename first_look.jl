@@ -253,7 +253,7 @@ begin
 	end
 
 	# Set up and solve bright soliton problem
-	ψ_soliton_0 = bright_solitons_shift.(x_grid, k, ξ, N, 0)
+	ψ_soliton_0 = bright_solitons_shift.(x_grid, k, ξ, N, π/4)
 
 	soliton_prob = ODEProblem(GPE,ψ_soliton_0,(ti, tf_gpe_soliton))
 
@@ -334,18 +334,17 @@ begin
 
 	energies_times = []
 
+	# Function I've made is being weird so build up array manually
+	
 	for t in 1:length(tf_gpe_soliton_grid)
 		append!(energies_times, E1(t))
 	end
 
-	# Function I've made is being weird so build up array manually
-
+	# Plot energy over time
 	plot(tf_gpe_soliton_grid, energies_times)
+	ylims!(0, 2000)
 
 end
-
-# ╔═╡ 53f01756-6647-48ea-b558-88c0fe95d079
-E1(999)
 
 # ╔═╡ bc844ca0-eabf-40e9-a18d-35d74c470d64
 1:length(tf_gpe_soliton_grid)
@@ -2891,7 +2890,6 @@ version = "1.4.1+2"
 # ╠═79d16592-e768-403f-a9c9-b986761d3534
 # ╠═625a55f7-db08-402c-87c4-0a86f2d95ead
 # ╠═0c6bf9df-91a6-41a5-89cc-c90b78fbee2b
-# ╠═53f01756-6647-48ea-b558-88c0fe95d079
 # ╠═bc844ca0-eabf-40e9-a18d-35d74c470d64
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
