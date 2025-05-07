@@ -380,9 +380,11 @@ begin
 
 	# Try soliton with a potential, why not
 
+	half_p = (0.5)*potential
+
 	function GPE_Potential(dψ,ψ,p,t)
 
-		dψ .= 1.0im*H_GPE_Sparse*ψ + (1.0im)*(abs2.(ψ)).*ψ - (0.5)*potential*ψ
+		dψ .= 1.0im*H_SHM_sparse*ψ .+ (1.0im)*(abs2.(ψ)).*ψ
 
 	end 
 
@@ -393,24 +395,33 @@ begin
 
 	end
 
+	tf_no_kick = 5
+	
+	t_grid_no_kick = LinRange(ti,tf_gpe,2) 
+
 	# Set up and solve bright soliton problem
+
+	# Doesn't work for some reason, even for num time steps < 10
+
+	# Need to figure out why
+	
 	ψ_soliton_potential = bright_solitons_no_kick.(x_grid, k, ξ, N)
 
-	soliton_potential_prob = ODEProblem(GPE_Potential,ψ_soliton_potential,(ti, tf_gpe_soliton))
+	soliton_potential_prob = ODEProblem(GPE_Potential,ψ_soliton_potential,(ti, tf_no_kick))
 
-	sol_soliton_potential = solve(soliton_potential_prob,alg=alg1,saveat=tf_gpe_soliton_grid)
+	sol_soliton_potential = solve(soliton_potential_prob,alg=alg1,saveat=t_grid_no_kick)
 
 end
 
 # ╔═╡ 9a45db7d-5a9e-4a62-91ad-cc4072d58546
-@bind t_soliton_no_kick Slider(1:length(t_grid_gpe))
+@bind t_soliton_no_kick Slider(1:length(t_grid_no_kick))
 
 # ╔═╡ 27e3e603-3655-4bf2-b161-6c5d181d0ed3
 begin
 	# Plot
 	plot()
 	plot!(x_grid,abs2.(sol_soliton_potential[:,t_soliton_no_kick]),lw=1.5,c=:blue)
-	title!("Time=$(tf_gpe_soliton_grid[t_soliton_no_kick])")
+	title!("Time=$(t_grid_no_kick[t_soliton_no_kick])")
 	xlabel!("x");ylabel!("Psi")
 	xlims!(-xbounds,xbounds)
 end
