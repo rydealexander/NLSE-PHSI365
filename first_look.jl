@@ -358,6 +358,8 @@ end
 begin
 
 	# Being very weird - coming out to zeros
+
+	# But that makes sense if we have particles of equal size and opposite speeds - total momentum would be zero
 	
 	M1(t) = Momentum(sol_soliton, x_grid, t)
 
