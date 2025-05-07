@@ -322,7 +322,15 @@ begin
 		return sol1 + sol2
 	end
 
-	Energy(sol_soliton, x_grid, t_soliton)
+	# Could be something wrong here
+	function Momentum(ψ, x, t)
+
+		to_integrate1 = ψ[:,t].*conj.(NumericalDerivative(ψ[:,t], x[2] - x[1])) - conj.(ψ[:,t]).*NumericalDerivative(ψ[:,t], x[2] - x[1])
+
+		problem1 = SampledIntegralProblem(to_integrate1, x)
+		method = SimpsonsRule()
+		return solve(problem1, method)
+	end
 
 
 end
@@ -346,8 +354,66 @@ begin
 
 end
 
-# ╔═╡ bc844ca0-eabf-40e9-a18d-35d74c470d64
-1:length(tf_gpe_soliton_grid)
+# ╔═╡ 6d536851-2741-4073-99b9-ffa7a0fd30df
+begin
+
+	# Being very weird - coming out to zeros
+	
+	M1(t) = Momentum(sol_soliton, x_grid, t)
+
+	momentum_times = []
+
+	# Function I've made is being weird so build up array manually
+	
+	for t in 1:length(tf_gpe_soliton_grid)
+		append!(momentum_times, M1(t))
+	end
+
+	# Plot momentum over time
+	# plot(tf_gpe_soliton_grid, momentum_times)
+	# ylims!(0, 2000)
+
+end
+
+# ╔═╡ f639765e-c267-4894-8a91-993a045b61ee
+begin
+
+	# Try soliton with a potential, why not
+
+	function GPE_Potential(dψ,ψ,p,t)
+
+		dψ .= 1.0im*H_GPE_Sparse*ψ + (1.0im)*(abs2.(ψ)).*ψ - (0.5)*potential*ψ
+
+	end 
+
+
+	function bright_solitons_no_kick(x,k,ξ, N)
+
+		return sqrt(N/(2*ξ))*(sech((x+4)/ξ)) + 0.0im
+
+	end
+
+	# Set up and solve bright soliton problem
+	ψ_soliton_potential = bright_solitons_no_kick.(x_grid, k, ξ, N)
+
+	soliton_potential_prob = ODEProblem(GPE_Potential,ψ_soliton_potential,(ti, tf_gpe_soliton))
+
+	sol_soliton_potential = solve(soliton_potential_prob,alg=alg1,saveat=tf_gpe_soliton_grid)
+
+end
+
+# ╔═╡ 9a45db7d-5a9e-4a62-91ad-cc4072d58546
+@bind t_soliton_no_kick Slider(1:length(t_grid_gpe))
+
+# ╔═╡ 27e3e603-3655-4bf2-b161-6c5d181d0ed3
+begin
+	# Plot
+	plot()
+	plot!(x_grid,abs2.(sol_soliton_potential[:,t_soliton_no_kick]),lw=1.5,c=:blue)
+	title!("Time=$(tf_gpe_soliton_grid[t_soliton_no_kick])")
+	xlabel!("x");ylabel!("Psi")
+	xlims!(-xbounds,xbounds)
+end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -2890,6 +2956,9 @@ version = "1.4.1+2"
 # ╠═79d16592-e768-403f-a9c9-b986761d3534
 # ╠═625a55f7-db08-402c-87c4-0a86f2d95ead
 # ╠═0c6bf9df-91a6-41a5-89cc-c90b78fbee2b
-# ╠═bc844ca0-eabf-40e9-a18d-35d74c470d64
+# ╠═6d536851-2741-4073-99b9-ffa7a0fd30df
+# ╠═f639765e-c267-4894-8a91-993a045b61ee
+# ╠═9a45db7d-5a9e-4a62-91ad-cc4072d58546
+# ╠═27e3e603-3655-4bf2-b161-6c5d181d0ed3
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
