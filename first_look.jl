@@ -17,7 +17,7 @@ macro bind(def, element)
 end
 
 # ╔═╡ a5d3665b-0a31-4663-8c25-377e6677593c
-using LinearAlgebra, SparseArrays, OrdinaryDiffEq, PlutoUI, Plots
+using LinearAlgebra, SparseArrays, OrdinaryDiffEq, PlutoUI, Plots, Integrals
 
 # ╔═╡ 8b6118e4-17fd-11f0-32f5-dd5270d18be9
 md"""
@@ -33,7 +33,7 @@ begin
 	# Set up our x and t grids
 	
 	xbounds = 5
-	x_granularity = 1000
+	x_granularity = 2000
 	x_grid = LinRange(-xbounds,xbounds,x_granularity) 
 	dx2 = x_grid[2]-x_grid[1]
 
@@ -117,8 +117,7 @@ begin
 	function schrod_shm!(dψ,ψ,p,t)
 
 			dψ .= -(1.0im)*H_SHM_sparse * ψ
-
-		end 
+	end 
 
 	alg1 = Vern6()
 
@@ -151,7 +150,7 @@ begin
 
 	# Set up GPE variables
 	
-	H_GPE = -(0.5).*dxx
+	H_GPE = 0.5.*dxx
 
 	H_GPE_Sparse = sparse(H_GPE)
 
@@ -159,26 +158,25 @@ begin
 
 	# Initial conditions
 
-	function gpe_initial(x)
+	function gpe_initial(x, A, B)
 
-		return 4*sech(x) + 0.0im
+		return A*sech(x/B) + 0.0im
 
 	end
 
-	ψ_g_0 = gpe_initial.(x_grid)
+	# Initial conditions
+	ψ_g_0 = gpe_initial.(x_grid, 4, 1)
 
 end; nothing
 
 # ╔═╡ 8b731ac3-1142-4343-9794-daff89f6552c
 begin
 
-	# Try Gross Pitaevskii instead
-
-	# dψ_gpe = zeros(ComplexF64, length(x_grid), length(t_grid_gpe))
+	# Dimensionless GPE, with negative g
 	
 	function GPE(dψ,ψ,p,t)
 
-			dψ .= -(1.0im)*H_GPE_Sparse*ψ + (1.0im)g*(abs2.(ψ)).*ψ
+			dψ .= 1.0im*H_GPE_Sparse*ψ + (1.0im)*(abs2.(ψ)).*ψ
 
 		end 
 
@@ -199,14 +197,16 @@ end; nothing
 # ╔═╡ 2b4c03c3-5c2c-460b-9e9c-a205b965a991
 begin
 
-	# Plot the real and imaginary parts of the numerical solutions to our SHM potential
+	# Plot the absolute value squared of the numerical solutions to our SHM potential
+
+	# In other words, the pdf
 
 	plot()
 	plot!(x_grid,abs2.(sol_gpe[:,t_gpe]),lw=1.5,c=:blue)
 	title!("Time=$(t_grid_gpe[t_gpe])")
 	xlabel!("x");ylabel!("Psi")
 	xlims!(-xbounds,xbounds)
-	ylims!(-50,50)
+	ylims!(0, 75)
 
 end
 
@@ -230,8 +230,8 @@ begin
 
 	# Now do for bright soliton
 
-	#
-	tf_gpe_soliton = 1
+	# Just investigate over 4 seconds, to see a few collisions
+	tf_gpe_soliton = 4
 	
 	tf_gpe_soliton_grid = LinRange(ti,tf_gpe_soliton,t_granularity) 
 
@@ -245,11 +245,6 @@ begin
 	k = 1
 
 	# Bright soliton
-	function bright_soliton_initial(x)
-
-		return sqrt(N/(2*ξ))*sech((x+1)/ξ)*ℯ^(im*k*x) + sqrt(N/(2*ξ))*sech((x-1)/ξ)*ℯ^(-im*k*x)*ℯ^(im*π/2)
-
-	end
 
 	function bright_solitons_shift(x,k,ξ, N, phase_shift)
 
@@ -257,9 +252,7 @@ begin
 
 	end
 
-	# Setup problem and solve it
-	# ψ_soliton_0 = bright_soliton_initial.(x_grid)
-
+	# Set up and solve bright soliton problem
 	ψ_soliton_0 = bright_solitons_shift.(x_grid, k, ξ, N, 0)
 
 	soliton_prob = ODEProblem(GPE,ψ_soliton_0,(ti, tf_gpe_soliton))
@@ -269,15 +262,14 @@ begin
 end; nothing
 
 # ╔═╡ 8a1d209a-222a-473d-88fa-59df6e7f5fd7
-@bind t_soliton Slider(1:length(t_grid_gpe))
+@bind t_soliton Slider(1:length(tf_gpe_soliton_grid))
 
 # ╔═╡ af8e1724-f606-45de-aaa6-a7db2ad0a42f
 begin
 	# Plot
 	plot()
-	plot!(x_grid,abs.(sol_soliton[:,t_soliton]).^2,lw=1.5,c=:blue)
-	# plot!(x_grid,imag(sol_gpe[:,t_gpe]),lw=1.5,c=:red)
-	title!("Time=$(t_grid_gpe[t_soliton])")
+	plot!(x_grid,abs2.(sol_soliton[:,t_soliton]),lw=1.5,c=:blue)
+	title!("Time=$(tf_gpe_soliton_grid[t_soliton])")
 	xlabel!("x");ylabel!("Psi")
 	xlims!(-xbounds,xbounds)
 end
@@ -285,31 +277,83 @@ end
 # ╔═╡ ba917a95-bfbf-4d96-a990-392e6fd55f78
 # Think about doing heatmap plots of collisions to investigate behaviour, like in book and Williams code
 
+# ╔═╡ 79d16592-e768-403f-a9c9-b986761d3534
+begin
+
+	# Calculate numerical derivative
+
+	# Have to do this in a different way, as computing the differences and dividing by the grid size for the derivatives gives us an array of n-1. 
+	# So, we set the derivatives at the start (left hand side) equal to the derivatives we find and the start, and then compute the average of the derivatives either side of each point on our grid for the derivatives on the interior region, and at the right hand point
+
+	function NumericalDerivative(func, Δx)
+		# Plain old derivatives
+		grads = [(func[i] - func[i-1])/Δx for i in 2:length(func)]
+
+		# Now build up our averages to keep the same grid size
+		numerical_deriv = [grads[1]]
+		append!(numerical_deriv, [(func[i] - func[i-1])/2 for i in 2:length(func)])
+		return numerical_deriv
+	end
+
+
+end
+
 # ╔═╡ 625a55f7-db08-402c-87c4-0a86f2d95ead
 begin
 
-	# Calculate energy at given time - below is JUST KINETIC - NEED INTERACTION - SEE BOOK
+	# Calculate energy at given time - page 64 from book
 
-	# Numerically integrate over ψ*Ĥψ
+	# Numerically integrate to find the energy
 
-	function Expectation(t)
-		return sol_soliton[:,t]'H_GPE_Sparse*sol_soliton[:,t]
+	# Use Integrals package (same people as OrdinaryDifferentialEquations https://docs.sciml.ai/Integrals/stable/) to integrate over domain to get energy
+
+	function Energy(ψ, x, t)
+
+		# Have to split up the integral from the book into 2 as, since we're doing numerical derivatives, we end up with different dimensions from ψ
+		to_integrate1 = abs2.(NumericalDerivative(ψ[:,t], x[2] - x[1])) 
+		to_integrate2 = (1/2)*(abs2.(ψ[:,t])).^2
+
+		problem1 = SampledIntegralProblem(to_integrate1, x)
+		problem2 = SampledIntegralProblem(to_integrate2, x)
+		method = SimpsonsRule()
+		sol1 = solve(problem1, method)
+		sol2 = solve(problem2, method)
+
+		return sol1 + sol2
 	end
 
-	Expectation(t_soliton)
+	Energy(sol_soliton, x_grid, t_soliton)
+
 
 end
 
-# ╔═╡ 75a23ac5-9ca2-4a5d-9dc4-f57488534104
+# ╔═╡ 0c6bf9df-91a6-41a5-89cc-c90b78fbee2b
 begin
 
-	# plot(1:length(t_grid_gpe), x->Expectation(x))
-	
+	E1(t) = Energy(sol_soliton, x_grid, t)
+
+	energies_times = []
+
+	for t in 1:length(tf_gpe_soliton_grid)
+		append!(energies_times, E1(t))
+	end
+
+	# Function I've made is being weird so build up array manually
+
+	plot(tf_gpe_soliton_grid, energies_times)
+
 end
+
+# ╔═╡ 53f01756-6647-48ea-b558-88c0fe95d079
+E1(999)
+
+# ╔═╡ bc844ca0-eabf-40e9-a18d-35d74c470d64
+1:length(tf_gpe_soliton_grid)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
+Integrals = "de52edbc-65ea-441a-8357-d3a637375a31"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
@@ -317,6 +361,7 @@ PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [compat]
+Integrals = "~4.5.0"
 OrdinaryDiffEq = "~6.93.0"
 Plots = "~1.40.11"
 PlutoUI = "~0.7.62"
@@ -328,7 +373,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.11.5"
 manifest_format = "2.0"
-project_hash = "65e433abaad84d638a7c8ed95aebc82dd3e4e696"
+project_hash = "04121bf5c97cdf17c47ac254660efe149e93ad3f"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "e2478490447631aedba0823d4d7a80b2cc8cdb32"
@@ -536,6 +581,11 @@ deps = ["ColorTypes", "FixedPointNumbers", "Reexport"]
 git-tree-sha1 = "64e15186f0aa277e174aa81798f7eb8598e0157e"
 uuid = "5ae59095-9a9b-59fe-a467-6f913c188581"
 version = "0.13.0"
+
+[[deps.Combinatorics]]
+git-tree-sha1 = "08c8b6831dc00bfea825826be0bc8336fc369860"
+uuid = "861a8166-3701-5b0c-9a16-15d98fcdc6aa"
+version = "1.0.2"
 
 [[deps.CommonSolve]]
 git-tree-sha1 = "0eee5eb66b1cf62cd6ad1b460238e60e4b09400c"
@@ -750,6 +800,22 @@ deps = ["Random", "Serialization", "Sockets"]
 uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 version = "1.11.0"
 
+[[deps.Distributions]]
+deps = ["AliasTables", "FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SpecialFunctions", "Statistics", "StatsAPI", "StatsBase", "StatsFuns"]
+git-tree-sha1 = "6d8b535fd38293bc54b88455465a1386f8ac1c3c"
+uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
+version = "0.25.119"
+
+    [deps.Distributions.extensions]
+    DistributionsChainRulesCoreExt = "ChainRulesCore"
+    DistributionsDensityInterfaceExt = "DensityInterface"
+    DistributionsTestExt = "Test"
+
+    [deps.Distributions.weakdeps]
+    ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
+    DensityInterface = "b429d917-457f-4dbc-8f4c-0cc954292b1d"
+    Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
 [[deps.DocStringExtensions]]
 git-tree-sha1 = "e7b7e6f178525d17c720ab9c081e4ef04429f860"
 uuid = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
@@ -871,16 +937,12 @@ deps = ["LinearAlgebra"]
 git-tree-sha1 = "6a70198746448456524cb442b8af316927ff3e1a"
 uuid = "1a297f60-69ca-5386-bcde-b61e274b549b"
 version = "1.13.0"
+weakdeps = ["PDMats", "SparseArrays", "Statistics"]
 
     [deps.FillArrays.extensions]
     FillArraysPDMatsExt = "PDMats"
     FillArraysSparseArraysExt = "SparseArrays"
     FillArraysStatisticsExt = "Statistics"
-
-    [deps.FillArrays.weakdeps]
-    PDMats = "90014a1f-27ba-587c-ab20-58faa44d9150"
-    SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
-    Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 
 [[deps.FiniteDiff]]
 deps = ["ArrayInterface", "LinearAlgebra", "Setfield"]
@@ -1014,6 +1076,12 @@ git-tree-sha1 = "53bb909d1151e57e2484c3d1b53e19552b887fb2"
 uuid = "42e2da0e-8278-4e71-bc24-59509adca0fe"
 version = "1.0.2"
 
+[[deps.HCubature]]
+deps = ["Combinatorics", "DataStructures", "LinearAlgebra", "QuadGK", "StaticArrays"]
+git-tree-sha1 = "19ef9f0cb324eed957b7fe7257ac84e8ed8a48ec"
+uuid = "19dc6840-f33b-545b-b366-655c7e3ffd49"
+version = "1.7.0"
+
 [[deps.HTTP]]
 deps = ["Base64", "CodecZlib", "ConcurrentUtilities", "Dates", "ExceptionUnwrapping", "Logging", "LoggingExtras", "MbedTLS", "NetworkOptions", "OpenSSL", "PrecompileTools", "Random", "SimpleBufferStream", "Sockets", "URIs", "UUIDs"]
 git-tree-sha1 = "c67b33b085f6e2faf8bf79a61962e7339a81129c"
@@ -1025,6 +1093,12 @@ deps = ["Artifacts", "Cairo_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll",
 git-tree-sha1 = "55c53be97790242c29031e5cd45e8ac296dadda3"
 uuid = "2e76f6c2-a576-52d4-95c1-20adfe4de566"
 version = "8.5.0+0"
+
+[[deps.HypergeometricFunctions]]
+deps = ["LinearAlgebra", "OpenLibm_jll", "SpecialFunctions"]
+git-tree-sha1 = "68c173f4f449de5b438ee67ed0c9c748dc31a2ec"
+uuid = "34004b35-14d8-5ef3-9330-4cdb6864b03a"
+version = "0.3.28"
 
 [[deps.Hyperscript]]
 deps = ["Test"]
@@ -1053,6 +1127,36 @@ version = "0.1.1"
 git-tree-sha1 = "d1b1b796e47d94588b3757fe84fbf65a5ec4a80d"
 uuid = "d25df0c9-e2be-5dd7-82c8-3ad0b3e990b9"
 version = "0.1.5"
+
+[[deps.IntegerMathUtils]]
+git-tree-sha1 = "b8ffb903da9f7b8cf695a8bead8e01814aa24b30"
+uuid = "18e54dd8-cb9d-406c-a71d-865a43cbb235"
+version = "0.1.2"
+
+[[deps.Integrals]]
+deps = ["CommonSolve", "HCubature", "LinearAlgebra", "MonteCarloIntegration", "QuadGK", "Random", "Reexport", "SciMLBase"]
+git-tree-sha1 = "cfdc4fb8d21c8f596572a59912ae863774123622"
+uuid = "de52edbc-65ea-441a-8357-d3a637375a31"
+version = "4.5.0"
+
+    [deps.Integrals.extensions]
+    IntegralsArblibExt = "Arblib"
+    IntegralsCubaExt = "Cuba"
+    IntegralsCubatureExt = "Cubature"
+    IntegralsFastGaussQuadratureExt = "FastGaussQuadrature"
+    IntegralsForwardDiffExt = "ForwardDiff"
+    IntegralsMCIntegrationExt = "MCIntegration"
+    IntegralsZygoteExt = ["Zygote", "ChainRulesCore"]
+
+    [deps.Integrals.weakdeps]
+    Arblib = "fb37089c-8514-4489-9461-98f9c8763369"
+    ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
+    Cuba = "8a292aeb-7a57-582c-b821-06e4c11590b1"
+    Cubature = "667455a9-e2ce-5579-9412-b964f529a492"
+    FastGaussQuadrature = "442a2c76-b920-505d-bb47-c5924d526838"
+    ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
+    MCIntegration = "ea1e2de9-7db7-4b42-91ee-0cd1bf6df167"
+    Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [[deps.IntelOpenMP_jll]]
 deps = ["Artifacts", "JLLWrappers", "LazyArtifacts", "Libdl"]
@@ -1165,6 +1269,12 @@ version = "0.16.7"
     DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
     SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
     SymEngine = "123dc426-2d89-5057-bbad-38513e3affd8"
+
+[[deps.LatticeRules]]
+deps = ["Random"]
+git-tree-sha1 = "7f5b02258a3ca0221a6a9710b0a0a2e8fb4957fe"
+uuid = "73f95e8e-ec14-4e6a-8b18-0d2e271c4e55"
+version = "0.0.1"
 
 [[deps.LayoutPointers]]
 deps = ["ArrayInterface", "LinearAlgebra", "ManualMemory", "SIMDTypes", "Static", "StaticArrayInterface"]
@@ -1422,6 +1532,12 @@ version = "1.2.0"
 [[deps.Mmap]]
 uuid = "a63ad114-7e13-5084-954f-fe012c677804"
 version = "1.11.0"
+
+[[deps.MonteCarloIntegration]]
+deps = ["Distributions", "QuasiMonteCarlo", "Random"]
+git-tree-sha1 = "722ad522068d31954b4a976b66a26aeccbf509ed"
+uuid = "4886b29c-78c9-11e9-0a6e-41e1f4161f7b"
+version = "0.2.0"
 
 [[deps.Moshi]]
 deps = ["ExproniconLite", "Jieko"]
@@ -1776,6 +1892,12 @@ deps = ["Artifacts", "Libdl"]
 uuid = "efcefdf7-47ab-520b-bdef-62a2eaa19f15"
 version = "10.42.0+1"
 
+[[deps.PDMats]]
+deps = ["LinearAlgebra", "SparseArrays", "SuiteSparse"]
+git-tree-sha1 = "0e1340b5d98971513bddaa6bbed470670cebbbfe"
+uuid = "90014a1f-27ba-587c-ab20-58faa44d9150"
+version = "0.11.34"
+
 [[deps.PackageExtensionCompat]]
 git-tree-sha1 = "fb28e33b8a95c4cee25ce296c817d89cc2e53518"
 uuid = "65ce6f38-6b18-4e1d-a461-8949797d7930"
@@ -1891,6 +2013,12 @@ git-tree-sha1 = "9306f6085165d270f7e3db02af26a400d580f5c6"
 uuid = "21216c6a-2e73-6563-6e65-726566657250"
 version = "1.4.3"
 
+[[deps.Primes]]
+deps = ["IntegerMathUtils"]
+git-tree-sha1 = "25cdd1d20cd005b52fc12cb6be3f75faaf59bb9b"
+uuid = "27ebfcd6-29c5-5fa9-bf4b-fb8fc14df3ae"
+version = "0.5.7"
+
 [[deps.Printf]]
 deps = ["Unicode"]
 uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
@@ -1924,6 +2052,28 @@ deps = ["Artifacts", "JLLWrappers", "Libdl", "Qt6Base_jll", "Qt6Declarative_jll"
 git-tree-sha1 = "729927532d48cf79f49070341e1d918a65aba6b0"
 uuid = "e99dba38-086e-5de3-a5b1-6e4c66e897c3"
 version = "6.7.1+1"
+
+[[deps.QuadGK]]
+deps = ["DataStructures", "LinearAlgebra"]
+git-tree-sha1 = "9da16da70037ba9d701192e27befedefb91ec284"
+uuid = "1fd47b50-473d-5c70-9696-f719f8f3bcdc"
+version = "2.11.2"
+
+    [deps.QuadGK.extensions]
+    QuadGKEnzymeExt = "Enzyme"
+
+    [deps.QuadGK.weakdeps]
+    Enzyme = "7da242da-08ed-463a-9acd-ee780be4f1d9"
+
+[[deps.QuasiMonteCarlo]]
+deps = ["Accessors", "ConcreteStructs", "LatticeRules", "LinearAlgebra", "Primes", "Random", "Requires", "Sobol", "StatsBase"]
+git-tree-sha1 = "cc086f8485bce77b6187141e1413c3b55f9a4341"
+uuid = "8a4e6c94-4038-4cdc-81c3-7e6ffdb2a71b"
+version = "0.3.3"
+weakdeps = ["Distributions"]
+
+    [deps.QuasiMonteCarlo.extensions]
+    QuasiMonteCarloDistributionsExt = "Distributions"
 
 [[deps.REPL]]
 deps = ["InteractiveUtils", "Markdown", "Sockets", "StyledStrings", "Unicode"]
@@ -1991,6 +2141,18 @@ deps = ["UUIDs"]
 git-tree-sha1 = "62389eeff14780bfe55195b7204c0d8738436d64"
 uuid = "ae029012-a4dd-5104-9daa-d747884805df"
 version = "1.3.1"
+
+[[deps.Rmath]]
+deps = ["Random", "Rmath_jll"]
+git-tree-sha1 = "852bd0f55565a9e973fcfee83a84413270224dc4"
+uuid = "79098fc4-a85e-5d69-aa6a-4863f24498fa"
+version = "0.8.0"
+
+[[deps.Rmath_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl"]
+git-tree-sha1 = "58cdd8fb2201a6267e1db87ff148dd6c1dbd8ad8"
+uuid = "f50d1b31-88e8-58de-be2c-1cc44531875f"
+version = "0.5.1+0"
 
 [[deps.RuntimeGeneratedFunctions]]
 deps = ["ExprTools", "SHA", "Serialization"]
@@ -2118,6 +2280,12 @@ git-tree-sha1 = "58e6353e72cde29b90a69527e56df1b5c3d8c437"
 uuid = "ce78b400-467f-4804-87d8-8f486da07d0a"
 version = "1.1.0"
 
+[[deps.Sobol]]
+deps = ["DelimitedFiles", "Random"]
+git-tree-sha1 = "5a74ac22a9daef23705f010f72c81d6925b19df8"
+uuid = "ed01d8cd-4d21-5b2a-85b4-cc3bdc58bad4"
+version = "1.5.0"
+
 [[deps.Sockets]]
 uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
 version = "1.11.0"
@@ -2241,6 +2409,17 @@ git-tree-sha1 = "29321314c920c26684834965ec2ce0dacc9cf8e5"
 uuid = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 version = "0.34.4"
 
+[[deps.StatsFuns]]
+deps = ["HypergeometricFunctions", "IrrationalConstants", "LogExpFunctions", "Reexport", "Rmath", "SpecialFunctions"]
+git-tree-sha1 = "8e45cecc66f3b42633b8ce14d431e8e57a3e242e"
+uuid = "4c63d2b9-4356-54db-8cca-17b64c39e42c"
+version = "1.5.0"
+weakdeps = ["ChainRulesCore", "InverseFunctions"]
+
+    [deps.StatsFuns.extensions]
+    StatsFunsChainRulesCoreExt = "ChainRulesCore"
+    StatsFunsInverseFunctionsExt = "InverseFunctions"
+
 [[deps.StrideArraysCore]]
 deps = ["ArrayInterface", "CloseOpenIntervals", "IfElse", "LayoutPointers", "LinearAlgebra", "ManualMemory", "SIMDTypes", "Static", "StaticArrayInterface", "ThreadingUtilities"]
 git-tree-sha1 = "f35f6ab602df8413a50c4a25ca14de821e8605fb"
@@ -2250,6 +2429,10 @@ version = "0.5.7"
 [[deps.StyledStrings]]
 uuid = "f489334b-da3d-4c2e-b8f0-e476e12c162b"
 version = "1.11.0"
+
+[[deps.SuiteSparse]]
+deps = ["Libdl", "LinearAlgebra", "Serialization", "SparseArrays"]
+uuid = "4607b0f0-06f3-5cda-b6b1-a6196a1729e9"
 
 [[deps.SuiteSparse_jll]]
 deps = ["Artifacts", "Libdl", "libblastrampoline_jll"]
@@ -2705,7 +2888,10 @@ version = "1.4.1+2"
 # ╠═8a1d209a-222a-473d-88fa-59df6e7f5fd7
 # ╠═af8e1724-f606-45de-aaa6-a7db2ad0a42f
 # ╠═ba917a95-bfbf-4d96-a990-392e6fd55f78
+# ╠═79d16592-e768-403f-a9c9-b986761d3534
 # ╠═625a55f7-db08-402c-87c4-0a86f2d95ead
-# ╠═75a23ac5-9ca2-4a5d-9dc4-f57488534104
+# ╠═0c6bf9df-91a6-41a5-89cc-c90b78fbee2b
+# ╠═53f01756-6647-48ea-b558-88c0fe95d079
+# ╠═bc844ca0-eabf-40e9-a18d-35d74c470d64
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
