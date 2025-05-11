@@ -33,7 +33,7 @@ begin
 	# Set up our x and t grids
 	
 	xbounds = 5
-	x_granularity = 5000
+	x_granularity = 2000
 	x_grid = LinRange(-xbounds,xbounds,x_granularity) 
 	dx2 = x_grid[2]-x_grid[1]
 
@@ -176,7 +176,7 @@ begin
 	
 	function GPE(dψ,ψ,p,t)
 
-			dψ .= 1.0im*H_GPE_Sparse*ψ + (1.0im)*(abs2.(ψ)).*ψ
+			dψ .= -1.0im*H_GPE_Sparse*ψ - (1.0im)*(abs2.(ψ)).*ψ
 
 		end 
 
@@ -382,18 +382,19 @@ begin
 
 	# Try soliton with a potential, why not
 
-	half_p = (0.5)*potential
+	new_H = sparse(-(0.5).*dxx + (0.5).*potential)
+	
 
 	function GPE_Potential(dψ,ψ,p,t)
 
-		dψ .= 1.0im*H_GPE_Sparse*ψ + (1.0im)*(abs2.(ψ)).*ψ - (1.0im)*half_p*ψ
+		dψ .= -1.0im*H_SHM_sparse*ψ + (1.0im)*(abs2.(ψ)).*ψ
 
 	end 
 
 
 	function bright_solitons_no_kick(x,k,ξ, N)
 
-		return sqrt(N/(2*ξ))*(sech((x+4)/ξ)) + 0.0im
+		return sqrt(N/(2*ξ))*(sech((x+4)/ξ)) + sqrt(N/(2*ξ))*(sech((x-4)/ξ)) + 0.0im
 
 	end
 
@@ -403,15 +404,12 @@ begin
 
 	# Set up and solve bright soliton problem
 
-	# Doesn't work for some reason, even for num time steps < 10
-
-	# Need to figure out why
 	
-	# ψ_soliton_potential = bright_solitons_no_kick.(x_grid, k, ξ, N)
+	ψ_soliton_potential = bright_solitons_no_kick.(x_grid, k, ξ, N)
 
-	# soliton_potential_prob = ODEProblem(GPE_Potential,ψ_soliton_potential,(ti, tf_no_kick))
+	soliton_potential_prob = ODEProblem(GPE_Potential,ψ_soliton_potential,(ti, tf_gpe_soliton))
 
-	# sol_soliton_potential = solve(soliton_potential_prob,alg=alg1,saveat=t_grid_no_kick)
+	sol_soliton_potential = solve(soliton_potential_prob,alg=alg1,saveat=tf_gpe_soliton_grid)
 
 end
 
@@ -421,11 +419,11 @@ end
 # ╔═╡ 27e3e603-3655-4bf2-b161-6c5d181d0ed3
 begin
 	# Plot
-	# plot()
-	# plot!(x_grid,abs2.(sol_soliton_potential[:,t_soliton_no_kick]),lw=1.5,c=:blue)
-	# title!("Time=$(t_grid_no_kick[t_soliton_no_kick])")
-	# xlabel!("x");ylabel!("Psi")
-	# xlims!(-xbounds,xbounds)
+	plot()
+	plot!(x_grid,abs2.(sol_soliton_potential[:,t_soliton_no_kick]),lw=1.5,c=:blue)
+	title!("Time=$(t_grid_no_kick[t_soliton_no_kick])")
+	xlabel!("x");ylabel!("Psi")
+	xlims!(-xbounds,xbounds)
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
