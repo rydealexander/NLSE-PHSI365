@@ -33,7 +33,7 @@ begin
 	# Set up our x and t grids
 	
 	xbounds = 5
-	x_granularity = 2000
+	x_granularity = 5000
 	x_grid = LinRange(-xbounds,xbounds,x_granularity) 
 	dx2 = x_grid[2]-x_grid[1]
 
@@ -253,7 +253,7 @@ begin
 	end
 
 	# Set up and solve bright soliton problem
-	ψ_soliton_0 = bright_solitons_shift.(x_grid, k, ξ, N, π/4)
+	ψ_soliton_0 = bright_solitons_shift.(x_grid, k, ξ, N, 0)
 
 	soliton_prob = ODEProblem(GPE,ψ_soliton_0,(ti, tf_gpe_soliton))
 
@@ -350,7 +350,7 @@ begin
 
 	# Plot energy over time
 	plot(tf_gpe_soliton_grid, energies_times)
-	ylims!(0, 2000)
+	# ylims!(0, 2000)
 
 end
 
@@ -372,8 +372,8 @@ begin
 	end
 
 	# Plot momentum over time
-	# plot(tf_gpe_soliton_grid, momentum_times)
-	# ylims!(0, 2000)
+	plot(tf_gpe_soliton_grid, real.(momentum_times))
+
 
 end
 
@@ -386,7 +386,7 @@ begin
 
 	function GPE_Potential(dψ,ψ,p,t)
 
-		dψ .= 1.0im*H_GPE_Sparse*ψ + (1.0im)*(abs2.(ψ)).*ψ - half_p*ψ
+		dψ .= 1.0im*H_GPE_Sparse*ψ + (1.0im)*(abs2.(ψ)).*ψ - (1.0im)*half_p*ψ
 
 	end 
 
