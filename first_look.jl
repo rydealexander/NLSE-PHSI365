@@ -393,9 +393,9 @@ begin
 
 
 	# Add in a phase offset to get them to collide
-	function bright_solitons_no_kick(x,k,ξ, N)
+	function bright_solitons_no_kick(x,k,ξ, N, phase_shift)
 
-		return sqrt(N/(2*ξ))*(sech((x+4)/ξ)) + sqrt(N/(2*ξ))*(sech((x-4)/ξ)) + 0.0im
+		return sqrt(N/(2*ξ))*(sech((x+4)/ξ)) + sqrt(N/(2*ξ))*(sech((x-4)/ξ))*ℯ^(im*phase_shift) + 0.0im
 
 	end
 
@@ -406,7 +406,7 @@ begin
 	# Set up and solve bright soliton problem
 
 	
-	ψ_soliton_potential = bright_solitons_no_kick.(x_grid, k, ξ, N)
+	ψ_soliton_potential = bright_solitons_no_kick.(x_grid, k, ξ, N, π)
 
 	soliton_potential_prob = ODEProblem(GPE_Potential,ψ_soliton_potential,(ti, tf_gpe_soliton))
 
@@ -426,6 +426,9 @@ begin
 	xlabel!("x");ylabel!("Psi")
 	xlims!(-xbounds,xbounds)
 end
+
+# ╔═╡ 27591dc7-a471-4967-a399-ea48db1fd61d
+# Could also do conservation of energy here as well, and momentum too
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -2972,5 +2975,6 @@ version = "1.4.1+2"
 # ╠═f639765e-c267-4894-8a91-993a045b61ee
 # ╠═9a45db7d-5a9e-4a62-91ad-cc4072d58546
 # ╠═27e3e603-3655-4bf2-b161-6c5d181d0ed3
+# ╠═27591dc7-a471-4967-a399-ea48db1fd61d
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
