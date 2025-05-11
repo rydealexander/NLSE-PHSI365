@@ -392,6 +392,7 @@ begin
 	end 
 
 
+	# Add in a phase offset to get them to collide
 	function bright_solitons_no_kick(x,k,ξ, N)
 
 		return sqrt(N/(2*ξ))*(sech((x+4)/ξ)) + sqrt(N/(2*ξ))*(sech((x-4)/ξ)) + 0.0im
@@ -414,14 +415,14 @@ begin
 end
 
 # ╔═╡ 9a45db7d-5a9e-4a62-91ad-cc4072d58546
-@bind t_soliton_no_kick Slider(1:length(t_grid_no_kick))
+@bind t_soliton_no_kick Slider(1:length(tf_gpe_soliton_grid))
 
 # ╔═╡ 27e3e603-3655-4bf2-b161-6c5d181d0ed3
 begin
 	# Plot
 	plot()
 	plot!(x_grid,abs2.(sol_soliton_potential[:,t_soliton_no_kick]),lw=1.5,c=:blue)
-	title!("Time=$(t_grid_no_kick[t_soliton_no_kick])")
+	title!("Time=$(tf_gpe_soliton_grid[t_soliton_no_kick])")
 	xlabel!("x");ylabel!("Psi")
 	xlims!(-xbounds,xbounds)
 end
