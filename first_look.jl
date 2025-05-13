@@ -176,7 +176,7 @@ begin
 	
 	function GPE(dψ,ψ,p,t)
 
-			dψ .= -1.0im*H_GPE_Sparse*ψ - (1.0im)*(abs2.(ψ)).*ψ
+			dψ .= 1.0im*H_GPE_Sparse*ψ + (1.0im)*(abs2.(ψ)).*ψ
 
 		end 
 
@@ -246,14 +246,14 @@ begin
 
 	# Bright soliton
 
-	function bright_solitons_shift(x,k,ξ, N, phase_shift)
+	function bright_solitons_shift(x,k1, k2, ξ, N, phase_shift)
 
-		return sqrt(N/(2*ξ))*(sech((x+1)/ξ)*ℯ^(im*k*x) + sech((x-1)/ξ)*ℯ^(-im*k*x)*ℯ^(im*phase_shift))
+		return sqrt(N/(2*ξ))*(sech((x+1)/ξ)*ℯ^(im*k1*x) + sech((x-1)/ξ)*ℯ^(-im*k2*x)*ℯ^(im*phase_shift))
 
 	end
 
 	# Set up and solve bright soliton problem
-	ψ_soliton_0 = bright_solitons_shift.(x_grid, k, ξ, N, 0)
+	ψ_soliton_0 = bright_solitons_shift.(x_grid, k, k, ξ, N, 0)
 
 	soliton_prob = ODEProblem(GPE,ψ_soliton_0,(ti, tf_gpe_soliton))
 
@@ -329,7 +329,7 @@ begin
 
 		problem1 = SampledIntegralProblem(to_integrate1, x)
 		method = SimpsonsRule()
-		return solve(problem1, method)
+		return (im/2)*solve(problem1, method)
 	end
 
 
