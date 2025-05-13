@@ -38,7 +38,7 @@ begin
 	dx2 = x_grid[2]-x_grid[1]
 
 	function initial_exp(x,t)
-		return ℯ^(-(x)^2)/2 + 0.0im
+		return 5*ℯ^(-(x)^2)/2 + 0.0im
 	end
 	
 	ti = 0.0
@@ -105,6 +105,7 @@ begin
 	title!("Eigenenergy=$(σ[eig])")
 	xlabel!("x");ylabel!("Eigenenergies")
 	xlims!(-xbounds,xbounds)
+	# plot!(x_grid, x_grid.^2)
 	# ylims!(-1, 1)
 
 end
