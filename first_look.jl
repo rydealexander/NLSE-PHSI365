@@ -253,7 +253,7 @@ begin
 	end
 
 	# Set up and solve bright soliton problem
-	ψ_soliton_0 = bright_solitons_shift.(x_grid, k, k, ξ, N, 0)
+	ψ_soliton_0 = bright_solitons_shift.(x_grid, k, k, ξ, N, pi)
 
 	soliton_prob = ODEProblem(GPE,ψ_soliton_0,(ti, tf_gpe_soliton))
 
@@ -357,8 +357,6 @@ end
 # ╔═╡ 6d536851-2741-4073-99b9-ffa7a0fd30df
 begin
 
-	# Being very weird - coming out to zeros
-
 	# But that makes sense if we have particles of equal size and opposite speeds - total momentum would be zero
 	
 	M1(t) = Momentum(sol_soliton, x_grid, t)
@@ -372,10 +370,16 @@ begin
 	end
 
 	# Plot momentum over time
+
+	# What does this look like plotting real and complex?
+	
 	plot(tf_gpe_soliton_grid, real.(momentum_times))
 
 
 end
+
+# ╔═╡ 060ff3cf-eaa7-441b-8bb3-514ba0177b7f
+# Could try and pick out the momenta of the individual bright solitons, watch these change as time goes on/they collide etc
 
 # ╔═╡ f639765e-c267-4894-8a91-993a045b61ee
 begin
@@ -425,10 +429,30 @@ begin
 	title!("Time=$(tf_gpe_soliton_grid[t_soliton_no_kick])")
 	xlabel!("x");ylabel!("Psi")
 	xlims!(-xbounds,xbounds)
+	plot!(x_grid, x_grid.^2)
 end
 
 # ╔═╡ 27591dc7-a471-4967-a399-ea48db1fd61d
 # Could also do conservation of energy here as well, and momentum too
+# Don't have a formula actually (our formula is for the GPE without a potential), so no dice - and gives us weird values too, defs shouldn't be zero everywhere
+
+# ╔═╡ 37feedcd-07bc-4695-a8d2-2c385b0b4f43
+begin
+
+	M_potential(t) = Momentum(sol_soliton_potential, x_grid, t)
+
+	momentum_potential_times = []
+
+	# Function I've made is being weird so build up array manually
+	
+	for t in 1:length(tf_gpe_soliton_grid)
+		append!(momentum_potential_times, M_potential(t))
+	end
+
+	# Plot momentum over time
+	plot(tf_gpe_soliton_grid, real.(momentum_potential_times))
+
+end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -2972,9 +2996,11 @@ version = "1.4.1+2"
 # ╠═625a55f7-db08-402c-87c4-0a86f2d95ead
 # ╠═0c6bf9df-91a6-41a5-89cc-c90b78fbee2b
 # ╠═6d536851-2741-4073-99b9-ffa7a0fd30df
+# ╠═060ff3cf-eaa7-441b-8bb3-514ba0177b7f
 # ╠═f639765e-c267-4894-8a91-993a045b61ee
 # ╠═9a45db7d-5a9e-4a62-91ad-cc4072d58546
 # ╠═27e3e603-3655-4bf2-b161-6c5d181d0ed3
 # ╠═27591dc7-a471-4967-a399-ea48db1fd61d
+# ╠═37feedcd-07bc-4695-a8d2-2c385b0b4f43
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
