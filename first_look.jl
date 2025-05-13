@@ -142,7 +142,8 @@ begin
 	title!("Time=$(t_grid[t_shm])")
 	xlabel!("x");ylabel!("Psi")
 	xlims!(-xbounds,xbounds)
-	ylims!(-1,1)
+	ylims!(-5,5)
+	plot!(x_grid, x_grid.^2)
 
 end
 
