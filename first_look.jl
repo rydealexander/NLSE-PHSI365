@@ -430,21 +430,38 @@ end
 # ╔═╡ 6bcb395c-bc77-4f48-afe6-6d9d7248308f
 gif(anim4, "GPE_soliton.gif", fps = 50)
 
-# ╔═╡ ba917a95-bfbf-4d96-a990-392e6fd55f78
-# Think about doing heatmap plots of collisions to investigate behaviour, like in book and Williams code
-
-# ╔═╡ 98da6aef-46b9-427f-93cd-dd5e5497eb6b
+# ╔═╡ aa80ef93-515f-44b2-8d1b-fd4e29758b08
 begin
+	# Set up and solve bright soliton problem
+	ψ_soliton_0_phi = bright_solitons_shift.(x_grid, k, k, ξ, N, 0)
 
-	abs_sol_soliton = abs2.(sol_soliton[:,:])
+	soliton_prob_0_phi = ODEProblem(GPE,ψ_soliton_0_phi,(ti, tf_gpe_soliton))
 
-	x_grid
-
-	tf_gpe_soliton_grid
-
-	heat_mat = [x_grid tf_gpe_soliton_grid abs_sol_soliton]
+	sol_soliton_0_phi = solve(soliton_prob_0_phi,alg=alg1,saveat=tf_gpe_soliton_grid)
 
 end
+
+# ╔═╡ b9975550-21c5-4c8a-ab42-684b7f661d81
+begin
+
+	anim5 = @animate for i in 1:length(tf_gpe_soliton_grid)
+
+		plot()
+	
+		plot!(x_grid,abs2.(sol_soliton_0_phi[:,i]),lw=1.5,c=:blue, legend=false)
+		title!("Wavefunction over Time (same phase): Time=$(round(tf_gpe_soliton_grid[i]))")
+		xlabel!(L"\bar{x}");ylabel!(L"{| \bar{\psi{ }} |}^2")
+		xlims!(-xbounds,xbounds)
+		
+	end
+
+end
+
+# ╔═╡ 81c9d46f-5e9c-4f82-9340-32db0c6157a1
+gif(anim5, "GPE_soliton_0_phase_offset.gif", fps = 50)
+
+# ╔═╡ ba917a95-bfbf-4d96-a990-392e6fd55f78
+# Think about doing heatmap plots of collisions to investigate behaviour, like in book and Williams code
 
 # ╔═╡ ffba32b8-4616-4de7-bc72-871816840569
 heatmap(abs2.(sol_soliton))
@@ -494,15 +511,6 @@ begin
 		return sol1 + sol2
 	end
 
-	# Could be something wrong here
-	function Momentum(ψ, x, t)
-
-		to_integrate1 = ψ[:,t].*conj.(NumericalDerivative(ψ[:,t], x[2] - x[1])) - conj.(ψ[:,t]).*NumericalDerivative(ψ[:,t], x[2] - x[1])
-
-		problem1 = SampledIntegralProblem(to_integrate1, x)
-		method = SimpsonsRule()
-		return (im/2)*solve(problem1, method)
-	end
 
 
 end
@@ -521,8 +529,66 @@ begin
 	end
 
 	# Plot energy over time
-	plot(tf_gpe_soliton_grid, energies_times)
-	# ylims!(0, 2000)
+	plot(tf_gpe_soliton_grid, energies_times, legend = false, title = L"Energy over time - ($\Delta\phi=\pi$)")
+	xlabel!("Time")
+	ylabel!("Energy")
+	ylims!(0, 2000)
+
+end
+
+# ╔═╡ 192b45c7-3660-48be-a685-fa7acff793e1
+begin
+
+	E1_0_phi(t) = Energy(sol_soliton_0_phi, x_grid, t)
+
+	energies_times_0_phi = []
+
+	# Function I've made is being weird so build up array manually
+	
+	for t in 1:length(tf_gpe_soliton_grid)
+		append!(energies_times_0_phi, E1_0_phi(t))
+	end
+
+	# Plot energy over time
+	plot(tf_gpe_soliton_grid, energies_times_0_phi, legend = false, title = L"Energy over time - ($\Delta\phi=0$)")
+	xlabel!(L"\bar{t}")
+	ylabel!(L"\bar{E}")
+	ylims!(0, 5000)
+
+end
+
+# ╔═╡ 25f6d9cd-c839-4f6e-a88f-9a3380f731d1
+begin
+
+	function solit(x, N, ξ)
+		return sqrt(N/(2*ξ))*(sech((x+1)/ξ))
+	end
+							 
+	function solit_deriv(x, N, ξ)
+		return (sqrt(N/(ξ))*(sech((x+1)/ξ))*(tanh((x+1)/ξ)))/(sqrt(2)ξ)
+	end
+	
+	test_numerical_derivative = NumericalDerivative(solit.(x_grid, N, ξ), x_grid[2] - x_grid[1])
+
+	actual_derivative = solit_deriv.(x_grid, N, ξ)
+
+	plot(x_grid, test_numerical_derivative, label="numerical")
+	# plot(actual_derivative, label="actual")
+
+end
+
+# ╔═╡ fcd8bcbf-2c80-4391-ad72-aa8760f20ca2
+begin
+
+	# Could be something wrong here
+	function Momentum(ψ, x, t)
+
+		to_integrate1 = ψ[:,t].*conj.(NumericalDerivative(ψ[:,t], x[2] - x[1])) - conj.(ψ[:,t]).*NumericalDerivative(ψ[:,t], x[2] - x[1])
+
+		problem1 = SampledIntegralProblem(to_integrate1, x)
+		method = SimpsonsRule()
+		return (im/2)*solve(problem1, method)
+	end
 
 end
 
@@ -549,6 +615,33 @@ begin
 
 
 end
+
+# ╔═╡ 81039781-a7eb-4fce-9e4d-3787fe00c33c
+begin
+
+	# But that makes sense if we have particles of equal size and opposite speeds - total momentum would be zero
+	
+	M1_0_phi(t) = Momentum(energies_times_0_phi, x_grid, t)
+
+	momentum_times_0_phi = []
+
+	# Function I've made is being weird so build up array manually
+	
+	for t in 1:length(tf_gpe_soliton_grid)
+		append!(momentum_times_0_phi, M1_0_phi(t))
+	end
+
+	# Plot momentum over time
+
+	# What does this look like plotting real and complex?
+	
+	# plot(tf_gpe_soliton_grid, real.(momentum_times_0_phi))
+
+
+end
+
+# ╔═╡ d4b1e1e0-28f0-4d6e-b69a-bf3c6edbd17a
+M1_0_phi(1)
 
 # ╔═╡ 060ff3cf-eaa7-441b-8bb3-514ba0177b7f
 # Could try and pick out the momenta of the individual bright solitons, watch these change as time goes on/they collide etc
@@ -3178,13 +3271,20 @@ version = "1.4.1+2"
 # ╠═af8e1724-f606-45de-aaa6-a7db2ad0a42f
 # ╠═f044470f-c3d8-4751-821a-99adc36ba51f
 # ╠═6bcb395c-bc77-4f48-afe6-6d9d7248308f
+# ╠═aa80ef93-515f-44b2-8d1b-fd4e29758b08
+# ╠═b9975550-21c5-4c8a-ab42-684b7f661d81
+# ╠═81c9d46f-5e9c-4f82-9340-32db0c6157a1
 # ╠═ba917a95-bfbf-4d96-a990-392e6fd55f78
-# ╠═98da6aef-46b9-427f-93cd-dd5e5497eb6b
 # ╠═ffba32b8-4616-4de7-bc72-871816840569
 # ╠═79d16592-e768-403f-a9c9-b986761d3534
 # ╠═625a55f7-db08-402c-87c4-0a86f2d95ead
 # ╠═0c6bf9df-91a6-41a5-89cc-c90b78fbee2b
+# ╠═192b45c7-3660-48be-a685-fa7acff793e1
+# ╠═25f6d9cd-c839-4f6e-a88f-9a3380f731d1
+# ╠═fcd8bcbf-2c80-4391-ad72-aa8760f20ca2
 # ╠═6d536851-2741-4073-99b9-ffa7a0fd30df
+# ╠═81039781-a7eb-4fce-9e4d-3787fe00c33c
+# ╠═d4b1e1e0-28f0-4d6e-b69a-bf3c6edbd17a
 # ╠═060ff3cf-eaa7-441b-8bb3-514ba0177b7f
 # ╠═f639765e-c267-4894-8a91-993a045b61ee
 # ╠═9a45db7d-5a9e-4a62-91ad-cc4072d58546
