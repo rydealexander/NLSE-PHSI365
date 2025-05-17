@@ -475,12 +475,13 @@ begin
 	# So, we set the derivatives at the start (left hand side) equal to the derivatives we find and the start, and then compute the average of the derivatives either side of each point on our grid for the derivatives on the interior region, and at the right hand point
 
 	function NumericalDerivative(func, Δx)
-		# Plain old derivatives
+		# Plain old derivatives - could do central difference but with small enough grid size it's probably not enough to matter
 		grads = [(func[i] - func[i-1])/Δx for i in 2:length(func)]
 
 		# Now build up our averages to keep the same grid size
 		numerical_deriv = [grads[1]]
-		append!(numerical_deriv, [(func[i] - func[i-1])/2 for i in 2:length(func)])
+		append!(numerical_deriv, [(grads[i] + grads[i-1])/2 for i in 2:length(func) - 1])
+		append!(numerical_deriv, grads[end])
 		return numerical_deriv
 	end
 
@@ -532,7 +533,7 @@ begin
 	plot(tf_gpe_soliton_grid, energies_times, legend = false, title = L"Energy over time - ($\Delta\phi=\pi$)")
 	xlabel!("Time")
 	ylabel!("Energy")
-	ylims!(0, 2000)
+	ylims!(0, 3000)
 
 end
 
@@ -565,16 +566,16 @@ begin
 	end
 							 
 	function solit_deriv(x, N, ξ)
-		return (sqrt(N/(ξ))*(sech((x+1)/ξ))*(tanh((x+1)/ξ)))/(sqrt(2)ξ)
+		return (-sqrt(N/(2*ξ))*(sech((x+1)/ξ))*(tanh((x+1)/ξ)))/ξ
 	end
 	
 	test_numerical_derivative = NumericalDerivative(solit.(x_grid, N, ξ), x_grid[2] - x_grid[1])
 
 	actual_derivative = solit_deriv.(x_grid, N, ξ)
 
-	plot(x_grid, test_numerical_derivative, label="numerical")
-	# plot(actual_derivative, label="actual")
-
+	plot(x_grid, test_numerical_derivative, label="numerical", color=:red)
+	scatter!(x_grid,actual_derivative, label="actual", color=:blue)
+	xlims!(-2,-0.5)
 end
 
 # ╔═╡ fcd8bcbf-2c80-4391-ad72-aa8760f20ca2
@@ -621,7 +622,7 @@ begin
 
 	# But that makes sense if we have particles of equal size and opposite speeds - total momentum would be zero
 	
-	M1_0_phi(t) = Momentum(energies_times_0_phi, x_grid, t)
+	M1_0_phi(t) = Momentum(sol_soliton_0_phi, x_grid, t)
 
 	momentum_times_0_phi = []
 
@@ -635,13 +636,10 @@ begin
 
 	# What does this look like plotting real and complex?
 	
-	# plot(tf_gpe_soliton_grid, real.(momentum_times_0_phi))
+	plot(tf_gpe_soliton_grid, real.(momentum_times_0_phi))
 
 
 end
-
-# ╔═╡ d4b1e1e0-28f0-4d6e-b69a-bf3c6edbd17a
-M1_0_phi(1)
 
 # ╔═╡ 060ff3cf-eaa7-441b-8bb3-514ba0177b7f
 # Could try and pick out the momenta of the individual bright solitons, watch these change as time goes on/they collide etc
@@ -3284,7 +3282,6 @@ version = "1.4.1+2"
 # ╠═fcd8bcbf-2c80-4391-ad72-aa8760f20ca2
 # ╠═6d536851-2741-4073-99b9-ffa7a0fd30df
 # ╠═81039781-a7eb-4fce-9e4d-3787fe00c33c
-# ╠═d4b1e1e0-28f0-4d6e-b69a-bf3c6edbd17a
 # ╠═060ff3cf-eaa7-441b-8bb3-514ba0177b7f
 # ╠═f639765e-c267-4894-8a91-993a045b61ee
 # ╠═9a45db7d-5a9e-4a62-91ad-cc4072d58546
