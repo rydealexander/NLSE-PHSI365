@@ -17,7 +17,7 @@ macro bind(def, element)
 end
 
 # ╔═╡ a5d3665b-0a31-4663-8c25-377e6677593c
-using LinearAlgebra, SparseArrays, OrdinaryDiffEq, PlutoUI, Plots, Integrals
+using LinearAlgebra, SparseArrays, OrdinaryDiffEq, PlutoUI, Plots, Integrals, LaTeXStrings
 
 # ╔═╡ 8b6118e4-17fd-11f0-32f5-dd5270d18be9
 md"""
@@ -103,11 +103,44 @@ begin
 	plot()
 	plot!(x_grid,u[:,eig],lw=1.5,c=:blue)
 	title!("Eigenenergy=$(σ[eig])")
-	xlabel!("x");ylabel!("Eigenenergies")
+	xlabel!("x");ylabel!(L"\psi(x)")
 	xlims!(-xbounds,xbounds)
 	# plot!(x_grid, x_grid.^2)
 	# ylims!(-1, 1)
 
+end
+
+# ╔═╡ 7ede9881-28aa-4a45-b184-6944464a1d42
+begin
+
+	# Plot eigenstates and eigenenergies
+
+	val1 = 1
+	val2 = 2
+
+	plot()
+	plot!(x_grid,u[:,val1],lw=1.5,c=:blue, label = "Eigenenergy=$(round(σ[val1]; sigdigits=1))")
+	title!("Solutions for the SHM Potential")
+	xlabel!(L"\bar{x}");ylabel!(L"\bar{\psi}")
+	plot!(x_grid,u[:,val2],lw=1.5,c=:red, label = "Eigenenergy=$(round(σ[val2]; sigdigits=1))")
+	xlims!(-xbounds,xbounds)
+
+end
+
+# ╔═╡ 5e5ee23a-18fd-4563-9d09-0230da1dc0ac
+begin
+
+	# Plot eigenstates and eigenenergies
+
+	rang = 1:10
+
+	plot()
+	plot!(rang,σ[rang],lw=1.5,c=:blue, legend=false)
+	title!("Eigenvalues of energy - SHM Potential")
+	xlabel!("Eigenvalue number");ylabel!("Eigenvalues")
+	xlims!(0,10)
+	ylims!(0,10)
+	
 end
 
 # ╔═╡ 62210722-8c7d-4548-a3f4-977fc42cc422
@@ -140,6 +173,66 @@ begin
 	plot!(x_grid,real(sol_shm[:,t_shm]),lw=1.5,c=:blue)
 	plot!(x_grid,imag(sol_shm[:,t_shm]),lw=1.5,c=:red)
 	title!("Time=$(t_grid[t_shm])")
+	xlabel!("x");ylabel!("Psi")
+	xlims!(-xbounds,xbounds)
+	ylims!(-5,5)
+	plot!(x_grid, x_grid.^2)
+
+end
+
+# ╔═╡ 8416b3cc-3778-46f1-892b-58a07c6b3428
+begin
+
+	anim = @animate for i in 1:667
+
+		plot()
+	
+		plot!(x_grid,real(sol_shm[:,i]),lw=1.5,c=:blue)
+		plot!(x_grid,imag(sol_shm[:,i]),lw=1.5,c=:red)
+		title!("Time=$(round(t_grid[i]))")
+		xlabel!("x");ylabel!("Psi")
+		xlims!(-xbounds,xbounds)
+		ylims!(-5,5)
+		plot!(x_grid, x_grid.^2)
+		
+	end
+
+end
+
+# ╔═╡ 555b0f59-ed7c-41bb-9bdb-19f084abe795
+gif(anim, "SHM.gif", fps = 50)
+
+# ╔═╡ 8d24a9c7-bcca-4eaa-a073-275a21cf2453
+begin
+
+	function initial_exp_offset(x,t)
+		return 5*ℯ^(-(x-2)^2)/2 + 0.0im
+	end
+
+	# Generate our initial conditions (t=0) on our grid
+	ψ_0_offset = initial_exp_offset.(x_grid,t_grid[1])
+
+	# Offset initial conditions - harmonic potential
+
+	schrod_shm_prob_offset = ODEProblem(schrod_shm!,ψ_0_offset,(ti, tf))
+
+	sol_shm_offset = solve(schrod_shm_prob_offset,alg=alg1,saveat=t_grid)
+
+
+end
+
+# ╔═╡ cb3679ba-f973-4bc6-a554-389018625882
+@bind t_shm_offset Slider(1:length(t_grid))
+
+# ╔═╡ 94112bd0-1026-443f-88ad-751d0dea7bb3
+begin
+
+	# Plot the real and imaginary parts of the numerical solutions to our SHM potential
+
+	plot()
+	plot!(x_grid,real(sol_shm_offset[:,t_shm_offset]),lw=1.5,c=:blue)
+	plot!(x_grid,imag(sol_shm_offset[:,t_shm_offset]),lw=1.5,c=:red)
+	title!("Time=$(t_grid[t_shm_offset])")
 	xlabel!("x");ylabel!("Psi")
 	xlims!(-xbounds,xbounds)
 	ylims!(-5,5)
@@ -278,6 +371,9 @@ end
 
 # ╔═╡ ba917a95-bfbf-4d96-a990-392e6fd55f78
 # Think about doing heatmap plots of collisions to investigate behaviour, like in book and Williams code
+
+# ╔═╡ 98da6aef-46b9-427f-93cd-dd5e5497eb6b
+
 
 # ╔═╡ 79d16592-e768-403f-a9c9-b986761d3534
 begin
@@ -460,6 +556,7 @@ end
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 Integrals = "de52edbc-65ea-441a-8357-d3a637375a31"
+LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
@@ -468,6 +565,7 @@ SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [compat]
 Integrals = "~4.5.0"
+LaTeXStrings = "~1.4.0"
 OrdinaryDiffEq = "~6.93.0"
 Plots = "~1.40.11"
 PlutoUI = "~0.7.62"
@@ -479,7 +577,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.11.5"
 manifest_format = "2.0"
-project_hash = "04121bf5c97cdf17c47ac254660efe149e93ad3f"
+project_hash = "2309fc9f393822c6b9a6c596f0fa01e0e627b089"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "e2478490447631aedba0823d4d7a80b2cc8cdb32"
@@ -2982,9 +3080,16 @@ version = "1.4.1+2"
 # ╠═d8d02d62-7f3d-44eb-a0d5-b40ac492b7d4
 # ╠═aa473863-17c6-4844-bd31-d2c6628599cc
 # ╠═58ea405a-73fd-42c3-9a99-0f98e1a9f90c
+# ╠═7ede9881-28aa-4a45-b184-6944464a1d42
+# ╠═5e5ee23a-18fd-4563-9d09-0230da1dc0ac
 # ╠═62210722-8c7d-4548-a3f4-977fc42cc422
 # ╠═7056bb81-d3e5-40ec-9206-6f443a7dd078
 # ╠═01455290-a711-4336-9a1f-529ce7e29de9
+# ╠═8416b3cc-3778-46f1-892b-58a07c6b3428
+# ╠═555b0f59-ed7c-41bb-9bdb-19f084abe795
+# ╠═8d24a9c7-bcca-4eaa-a073-275a21cf2453
+# ╠═cb3679ba-f973-4bc6-a554-389018625882
+# ╠═94112bd0-1026-443f-88ad-751d0dea7bb3
 # ╠═5f329df0-34d2-4583-b14a-c333d74854ed
 # ╠═8b731ac3-1142-4343-9794-daff89f6552c
 # ╟─2d161190-8b99-4d84-8a69-ffdbdf9f03c5
@@ -2994,6 +3099,7 @@ version = "1.4.1+2"
 # ╠═8a1d209a-222a-473d-88fa-59df6e7f5fd7
 # ╠═af8e1724-f606-45de-aaa6-a7db2ad0a42f
 # ╠═ba917a95-bfbf-4d96-a990-392e6fd55f78
+# ╠═98da6aef-46b9-427f-93cd-dd5e5497eb6b
 # ╠═79d16592-e768-403f-a9c9-b986761d3534
 # ╠═625a55f7-db08-402c-87c4-0a86f2d95ead
 # ╠═0c6bf9df-91a6-41a5-89cc-c90b78fbee2b
