@@ -189,11 +189,11 @@ begin
 	
 		plot!(x_grid,real(sol_shm[:,i]),lw=1.5,c=:blue, label = L"Re(\psi)")
 		plot!(x_grid,imag(sol_shm[:,i]),lw=1.5,c=:red, label = L"Im(\psi)")
-		title!("Time=$(round(t_grid[i]))")
-		xlabel!("x");ylabel!("Psi")
+		title!("Wavefunction over Time: Time=$(round(t_grid[i]))")
+		xlabel!(L"\bar{x}");ylabel!(L"\bar{\psi}")
 		xlims!(-xbounds,xbounds)
 		ylims!(-5,5)
-		plot!(x_grid, x_grid.^2, label = L"Potential")
+		plot!(x_grid, x_grid.^2, label = "Potential")
 		
 	end
 
@@ -239,6 +239,28 @@ begin
 	plot!(x_grid, x_grid.^2)
 
 end
+
+# ╔═╡ 3dcf36f4-f777-4e75-bcf5-05d92dcf333b
+begin
+
+	anim2 = @animate for i in 1:667
+
+		plot()
+	
+		plot!(x_grid,real(sol_shm_offset[:,i]),lw=1.5,c=:blue, label = L"Re(\psi)")
+		plot!(x_grid,imag(sol_shm_offset[:,i]),lw=1.5,c=:red, label = L"Im(\psi)")
+		title!("Wavefunction over Time: Time=$(round(t_grid[i]))")
+		xlabel!(L"\bar{x}");ylabel!(L"\bar{\psi}")
+		xlims!(-xbounds,xbounds)
+		ylims!(-5,5)
+		plot!(x_grid, x_grid.^2, label = "Potential")
+		
+	end
+
+end
+
+# ╔═╡ ecaf7d45-8a29-4fcf-85ee-4e310b9f0cc2
+gif(anim2, "SHM_offset.gif", fps = 50)
 
 # ╔═╡ 5f329df0-34d2-4583-b14a-c333d74854ed
 begin
@@ -305,6 +327,26 @@ begin
 
 end
 
+# ╔═╡ a4c94290-2bef-457c-8d23-591d3b7bc565
+begin
+
+	anim3 = @animate for i in 1:667
+
+		plot()
+	
+	plot!(x_grid,abs2.(sol_gpe[:,i]),lw=1.5,c=:blue, label = L"\psi")
+	title!("Wavefunction over Time: Time=$(round(t_grid_gpe[i]))")
+	xlabel!(L"\bar{x}");ylabel!(L"{| \bar{\psi{ }} |}^2")
+	xlims!(-xbounds,xbounds)
+	ylims!(0, 75)
+		
+	end
+
+end
+
+# ╔═╡ 8fa7af89-efec-42ce-8d8b-181dac51e554
+gif(anim3, "GPE_temporal.gif", fps = 50)
+
 # ╔═╡ 9b25dad5-b855-43c5-a771-4bb73ecb5a07
 begin
 
@@ -326,7 +368,7 @@ begin
 	# Now do for bright soliton
 
 	# Just investigate over 4 seconds, to see a few collisions
-	tf_gpe_soliton = 4
+	tf_gpe_soliton = 12
 	
 	tf_gpe_soliton_grid = LinRange(ti,tf_gpe_soliton,t_granularity) 
 
@@ -369,11 +411,43 @@ begin
 	xlims!(-xbounds,xbounds)
 end
 
+# ╔═╡ f044470f-c3d8-4751-821a-99adc36ba51f
+begin
+
+	anim4 = @animate for i in 1:length(tf_gpe_soliton_grid)
+
+		plot()
+	
+		plot!(x_grid,abs2.(sol_soliton[:,i]),lw=1.5,c=:blue, legend=false)
+		title!("Wavefunction over Time: Time=$(round(tf_gpe_soliton_grid[i]))")
+		xlabel!(L"\bar{x}");ylabel!(L"{| \bar{\psi{ }} |}^2")
+		xlims!(-xbounds,xbounds)
+		
+	end
+
+end
+
+# ╔═╡ 6bcb395c-bc77-4f48-afe6-6d9d7248308f
+gif(anim4, "GPE_soliton.gif", fps = 50)
+
 # ╔═╡ ba917a95-bfbf-4d96-a990-392e6fd55f78
 # Think about doing heatmap plots of collisions to investigate behaviour, like in book and Williams code
 
 # ╔═╡ 98da6aef-46b9-427f-93cd-dd5e5497eb6b
+begin
 
+	abs_sol_soliton = abs2.(sol_soliton[:,:])
+
+	x_grid
+
+	tf_gpe_soliton_grid
+
+	heat_mat = [x_grid tf_gpe_soliton_grid abs_sol_soliton]
+
+end
+
+# ╔═╡ ffba32b8-4616-4de7-bc72-871816840569
+heatmap(abs2.(sol_soliton))
 
 # ╔═╡ 79d16592-e768-403f-a9c9-b986761d3534
 begin
@@ -3090,16 +3164,23 @@ version = "1.4.1+2"
 # ╠═8d24a9c7-bcca-4eaa-a073-275a21cf2453
 # ╠═cb3679ba-f973-4bc6-a554-389018625882
 # ╠═94112bd0-1026-443f-88ad-751d0dea7bb3
+# ╠═3dcf36f4-f777-4e75-bcf5-05d92dcf333b
+# ╠═ecaf7d45-8a29-4fcf-85ee-4e310b9f0cc2
 # ╠═5f329df0-34d2-4583-b14a-c333d74854ed
 # ╠═8b731ac3-1142-4343-9794-daff89f6552c
 # ╟─2d161190-8b99-4d84-8a69-ffdbdf9f03c5
 # ╠═2b4c03c3-5c2c-460b-9e9c-a205b965a991
+# ╠═a4c94290-2bef-457c-8d23-591d3b7bc565
+# ╠═8fa7af89-efec-42ce-8d8b-181dac51e554
 # ╠═9b25dad5-b855-43c5-a771-4bb73ecb5a07
 # ╠═64a9f143-bd8f-4458-9a0c-6895264b5ac8
 # ╠═8a1d209a-222a-473d-88fa-59df6e7f5fd7
 # ╠═af8e1724-f606-45de-aaa6-a7db2ad0a42f
+# ╠═f044470f-c3d8-4751-821a-99adc36ba51f
+# ╠═6bcb395c-bc77-4f48-afe6-6d9d7248308f
 # ╠═ba917a95-bfbf-4d96-a990-392e6fd55f78
 # ╠═98da6aef-46b9-427f-93cd-dd5e5497eb6b
+# ╠═ffba32b8-4616-4de7-bc72-871816840569
 # ╠═79d16592-e768-403f-a9c9-b986761d3534
 # ╠═625a55f7-db08-402c-87c4-0a86f2d95ead
 # ╠═0c6bf9df-91a6-41a5-89cc-c90b78fbee2b
