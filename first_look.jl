@@ -187,13 +187,13 @@ begin
 
 		plot()
 	
-		plot!(x_grid,real(sol_shm[:,i]),lw=1.5,c=:blue)
-		plot!(x_grid,imag(sol_shm[:,i]),lw=1.5,c=:red)
+		plot!(x_grid,real(sol_shm[:,i]),lw=1.5,c=:blue, label = L"Re(\psi)")
+		plot!(x_grid,imag(sol_shm[:,i]),lw=1.5,c=:red, label = L"Im(\psi)")
 		title!("Time=$(round(t_grid[i]))")
 		xlabel!("x");ylabel!("Psi")
 		xlims!(-xbounds,xbounds)
 		ylims!(-5,5)
-		plot!(x_grid, x_grid.^2)
+		plot!(x_grid, x_grid.^2, label = L"Potential")
 		
 	end
 
