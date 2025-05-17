@@ -612,7 +612,9 @@ begin
 
 	# What does this look like plotting real and complex?
 	
-	plot(tf_gpe_soliton_grid, real.(momentum_times))
+	plot(tf_gpe_soliton_grid, real.(momentum_times), legend=false, title = L"Momentum of Colliding Solitons over Time ($\Delta\phi=\pi$)")
+	xlabel!("Time")
+	ylabel!("Momentum")
 
 
 end
@@ -636,7 +638,9 @@ begin
 
 	# What does this look like plotting real and complex?
 	
-	plot(tf_gpe_soliton_grid, real.(momentum_times_0_phi))
+	plot(tf_gpe_soliton_grid, real.(momentum_times_0_phi), legend=false, title = L"Momentum of Colliding Solitons over Time ($\Delta\phi=0$)")
+	xlabel!("Time")
+	ylabel!("Momentum")
 
 
 end
@@ -673,7 +677,7 @@ begin
 	# Set up and solve bright soliton problem
 
 	
-	ψ_soliton_potential = bright_solitons_no_kick.(x_grid, k, ξ, N, π)
+	ψ_soliton_potential = bright_solitons_no_kick.(x_grid, k, ξ, N, pi)
 
 	soliton_potential_prob = ODEProblem(GPE_Potential,ψ_soliton_potential,(ti, tf_gpe_soliton))
 
@@ -694,6 +698,27 @@ begin
 	xlims!(-xbounds,xbounds)
 	plot!(x_grid, x_grid.^2)
 end
+
+# ╔═╡ b242b6c0-2995-4db7-92c3-31c2ff14c04e
+begin
+
+	anim6 = @animate for i in 1:length(tf_gpe_soliton_grid)
+
+		plot()
+	
+	plot!(x_grid,abs2.(sol_soliton_potential[:,i]),lw=1.5,c=:blue, label = "Wavefunction")
+	title!("Wavefunction over Time (same phase): Time=$(round(tf_gpe_soliton_grid[i]))")
+	xlabel!(L"\bar{x}");ylabel!(L"{| \bar{\psi{ }} |}^2")
+	xlims!(-xbounds,xbounds)
+	xlims!(-xbounds,xbounds)
+	plot!(x_grid, x_grid.^2, label = "Potential")
+		
+	end
+
+end
+
+# ╔═╡ 82831fd8-0077-4e01-9476-42cd5313c8d9
+gif(anim6, "GPE_soliton_potential.gif", fps = 50)
 
 # ╔═╡ 27591dc7-a471-4967-a399-ea48db1fd61d
 # Could also do conservation of energy here as well, and momentum too
@@ -3286,6 +3311,8 @@ version = "1.4.1+2"
 # ╠═f639765e-c267-4894-8a91-993a045b61ee
 # ╠═9a45db7d-5a9e-4a62-91ad-cc4072d58546
 # ╠═27e3e603-3655-4bf2-b161-6c5d181d0ed3
+# ╠═b242b6c0-2995-4db7-92c3-31c2ff14c04e
+# ╠═82831fd8-0077-4e01-9476-42cd5313c8d9
 # ╠═27591dc7-a471-4967-a399-ea48db1fd61d
 # ╠═37feedcd-07bc-4695-a8d2-2c385b0b4f43
 # ╟─00000000-0000-0000-0000-000000000001
