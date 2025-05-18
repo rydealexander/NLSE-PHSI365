@@ -58,8 +58,8 @@ begin
 	# dxx[end,end] = -1
 
 	# Periodic boundaries
-	# dxx[1,end] = 1
-	# dxx[end,1] = 1
+	dxx[1,end] = 1
+	dxx[end,1] = 1
 
 	dxx ./= dx2^2
 
@@ -103,7 +103,7 @@ begin
 	plot()
 	plot!(x_grid,u[:,eig],lw=1.5,c=:blue)
 	title!("Eigenenergy=$(σ[eig])")
-	xlabel!("x");ylabel!(L"\psi(x)")
+	xlabel!("x");ylabel!(L"\psi")
 	xlims!(-xbounds,xbounds)
 	# plot!(x_grid, x_grid.^2)
 	# ylims!(-1, 1)
@@ -233,7 +233,7 @@ begin
 	plot!(x_grid,real(sol_shm_offset[:,t_shm_offset]),lw=1.5,c=:blue)
 	plot!(x_grid,imag(sol_shm_offset[:,t_shm_offset]),lw=1.5,c=:red)
 	title!("Time=$(t_grid[t_shm_offset])")
-	xlabel!("x");ylabel!("Psi")
+	xlabel!(L"\bar{x}");ylabel!(L"{| \bar{\psi{ }}\, |}^2")
 	xlims!(-xbounds,xbounds)
 	ylims!(-5,5)
 	plot!(x_grid, x_grid.^2)
@@ -321,7 +321,7 @@ begin
 	plot()
 	plot!(x_grid,abs2.(sol_gpe[:,t_gpe]),lw=1.5,c=:blue)
 	title!("Time=$(t_grid_gpe[t_gpe])")
-	xlabel!("x");ylabel!("Psi")
+	xlabel!(L"\bar{x}");ylabel!(L"{| \bar{\psi{ }}\, |}^2")
 	xlims!(-xbounds,xbounds)
 	ylims!(0, 75)
 
@@ -336,7 +336,7 @@ begin
 	
 	plot!(x_grid,abs2.(sol_gpe[:,i]),lw=1.5,c=:blue, label = L"\psi")
 	title!("Wavefunction over Time: Time=$(round(t_grid_gpe[i]))")
-	xlabel!(L"\bar{x}");ylabel!(L"{| \bar{\psi{ }} |}^2")
+	xlabel!(L"\bar{x}");ylabel!(L"{| \bar{\psi{ }}\, |}^2")
 	xlims!(-xbounds,xbounds)
 	ylims!(0, 75)
 		
@@ -407,7 +407,7 @@ begin
 	plot()
 	plot!(x_grid,abs2.(sol_soliton[:,t_soliton]),lw=1.5,c=:blue)
 	title!("Time=$(tf_gpe_soliton_grid[t_soliton])")
-	xlabel!("x");ylabel!("Psi")
+	xlabel!(L"\bar{x}");ylabel!(L"{| \bar{\psi{ }}\, |}^2")
 	xlims!(-xbounds,xbounds)
 end
 
@@ -420,7 +420,7 @@ begin
 	
 		plot!(x_grid,abs2.(sol_soliton[:,i]),lw=1.5,c=:blue, legend=false)
 		title!("Wavefunction over Time: Time=$(round(tf_gpe_soliton_grid[i]))")
-		xlabel!(L"\bar{x}");ylabel!(L"{| \bar{\psi{ }} |}^2")
+		xlabel!(L"\bar{x}");ylabel!(L"{| \bar{\psi{ }}\, |}^2")
 		xlims!(-xbounds,xbounds)
 		
 	end
@@ -450,7 +450,7 @@ begin
 	
 		plot!(x_grid,abs2.(sol_soliton_0_phi[:,i]),lw=1.5,c=:blue, legend=false)
 		title!("Wavefunction over Time (same phase): Time=$(round(tf_gpe_soliton_grid[i]))")
-		xlabel!(L"\bar{x}");ylabel!(L"{| \bar{\psi{ }} |}^2")
+		xlabel!(L"\bar{x}");ylabel!(L"{| \bar{\psi{ }}\, |}^2")
 		xlims!(-xbounds,xbounds)
 		
 	end
@@ -513,6 +513,27 @@ begin
 	end
 
 
+
+end
+
+# ╔═╡ 6ff3655a-10d6-464c-b8ef-185cb6f42632
+begin
+
+	E0(t) = Energy(sol_gpe, x_grid, t)
+
+	energies_times_0 = []
+
+	# Function I've made is being weird so build up array manually
+	
+	for t in 1:length(t_grid_gpe)
+		append!(energies_times_0, E0(t))
+	end
+
+	# Plot energy over time
+	plot(t_grid_gpe, energies_times_0, legend = false, title = L"Energy over time - ($\Delta\phi=\pi$)")
+	xlabel!("Time")
+	ylabel!("Energy")
+	# ylims!(0, 3000)
 
 end
 
@@ -3284,7 +3305,7 @@ version = "1.4.1+2"
 # ╠═ecaf7d45-8a29-4fcf-85ee-4e310b9f0cc2
 # ╠═5f329df0-34d2-4583-b14a-c333d74854ed
 # ╠═8b731ac3-1142-4343-9794-daff89f6552c
-# ╟─2d161190-8b99-4d84-8a69-ffdbdf9f03c5
+# ╠═2d161190-8b99-4d84-8a69-ffdbdf9f03c5
 # ╠═2b4c03c3-5c2c-460b-9e9c-a205b965a991
 # ╠═a4c94290-2bef-457c-8d23-591d3b7bc565
 # ╠═8fa7af89-efec-42ce-8d8b-181dac51e554
@@ -3301,6 +3322,7 @@ version = "1.4.1+2"
 # ╠═ffba32b8-4616-4de7-bc72-871816840569
 # ╠═79d16592-e768-403f-a9c9-b986761d3534
 # ╠═625a55f7-db08-402c-87c4-0a86f2d95ead
+# ╠═6ff3655a-10d6-464c-b8ef-185cb6f42632
 # ╠═0c6bf9df-91a6-41a5-89cc-c90b78fbee2b
 # ╠═192b45c7-3660-48be-a685-fa7acff793e1
 # ╠═25f6d9cd-c839-4f6e-a88f-9a3380f731d1
