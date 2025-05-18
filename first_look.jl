@@ -27,11 +27,21 @@ md"""
 
 """
 
+# ╔═╡ 710374f7-76f2-417f-825b-2879bf2f3c44
+begin
+
+	# William's code
+
+	
+	
+
+end
+
 # ╔═╡ 5d1a01ca-e65e-4d77-9f97-c956a17be8fc
 begin
 	
 	function initial_exp(x)
-		return 5*ℯ^(-(x)^2)/2 + 0.0im
+		return ℯ^(-(x)^2/2) + 0.0im
 	end
 
 end
@@ -42,13 +52,13 @@ begin
 	# Set up our x and t grids
 	
 	xbounds = 10
-	x_granularity = 1000
+	x_granularity = 2001
 	x_grid = LinRange(-xbounds,xbounds,x_granularity) 
 	dx2 = x_grid[2]-x_grid[1]
 	
 	ti = 0.0
 	tf = 15
-	t_granularity = 1000
+	t_granularity = 2000
 	t_grid = LinRange(ti,tf,t_granularity) 
 
 	# Generate our initial conditions (t=0) on our grid
@@ -161,7 +171,7 @@ begin
 	
 	function schrod_shm!(dψ,ψ,p,t)
 
-			dψ .= -(1.0im)*H_SHM_sparse * ψ
+			dψ .= -1.0*im*H_SHM_sparse * ψ
 	end 
 
 	alg1 = Vern6()
@@ -186,7 +196,7 @@ begin
 	title!("Time=$(t_grid[t_shm])")
 	xlabel!("x");ylabel!("Psi")
 	xlims!(-xbounds,xbounds)
-	ylims!(-5,5)
+	ylims!(-1,1)
 	plot!(x_grid, x_grid.^2)
 
 end
@@ -269,7 +279,7 @@ end
 # ╔═╡ 3dcf36f4-f777-4e75-bcf5-05d92dcf333b
 begin
 
-	anim2 = @animate for i in 1:667
+	anim2 = @animate for i in 1:600
 
 		plot()
 	
@@ -324,7 +334,7 @@ begin
 		end 
 
 	# New timescale for GPE
-	tf_gpe = 15
+	tf_gpe = 10
 	
 	t_grid_gpe = LinRange(ti,tf_gpe,t_granularity) 
 	
@@ -411,7 +421,7 @@ begin
 
 	function bright_solitons_shift(x,k1, k2, ξ, N, phase_shift)
 
-		return sqrt(N/(2*ξ))*(sech((x+1)/ξ)*ℯ^(im*k1*x) + sech((x-1)/ξ)*ℯ^(-im*k2*x)*ℯ^(im*phase_shift))
+		return sqrt(N/(2*ξ))*(sech((x+2.5)/ξ)*ℯ^(im*k1*x) + sech((x-2.5)/ξ)*ℯ^(-im*k2*x)*ℯ^(im*phase_shift))
 
 	end
 
@@ -538,6 +548,22 @@ begin
 		return sol1 + sol2
 	end
 
+	function EnergySplit(ψ, x, t)
+
+		# Have to split up the integral from the book into 2 as, since we're doing numerical derivatives, we end up with different dimensions from ψ
+		to_integrate1 = abs2.(NumericalDerivative(ψ[:,t], x[2] - x[1])) 
+		to_integrate2 = (1/2)*(abs2.(ψ[:,t])).^2
+
+		problem1 = SampledIntegralProblem(to_integrate1, x)
+		problem2 = SampledIntegralProblem(to_integrate2, x)
+		method = SimpsonsRule()
+		sol1 = solve(problem1, method)
+		sol2 = solve(problem2, method)
+
+		# First is kinetic, second is interaction
+		return [sol1, sol2]
+	end
+
 
 
 end
@@ -599,6 +625,31 @@ begin
 
 	# Plot energy over time
 	plot(tf_gpe_soliton_grid, energies_times_0_phi, legend = false, title = L"Energy over time - ($\Delta\phi=0$)")
+	xlabel!(L"\bar{t}")
+	ylabel!(L"\bar{E}")
+	ylims!(0, 5000)
+
+end
+
+# ╔═╡ c17adabe-9b04-4927-9374-3bd2e848eb1b
+begin
+
+	E1_0_phi_split(t) = EnergySplit(sol_soliton_0_phi, x_grid, t)
+
+	kinetic = []
+
+	interaction = []
+
+	# Function I've made is being weird so build up array manually
+	
+	for t in 1:length(tf_gpe_soliton_grid)
+		append!(kinetic, E1_0_phi_split(t)[1])
+		append!(interaction, E1_0_phi_split(t)[2])
+	end
+
+	# Plot energy over time
+	plot(tf_gpe_soliton_grid, kinetic, label = "Kinetic", title = L"Energy over time - ($\Delta\phi=0$)")
+	plot!(tf_gpe_soliton_grid, interaction, label = "Interaction")
 	xlabel!(L"\bar{t}")
 	ylabel!(L"\bar{E}")
 	ylims!(0, 5000)
@@ -743,7 +794,7 @@ begin
 	title!("Time=$(tf_gpe_soliton_grid[t_soliton_no_kick])")
 	xlabel!("x");ylabel!("Psi")
 	xlims!(-xbounds,xbounds)
-	plot!(x_grid, x_grid.^2)
+	plot!(x_grid, (x_grid.^2)./2)
 end
 
 # ╔═╡ b242b6c0-2995-4db7-92c3-31c2ff14c04e
@@ -758,7 +809,7 @@ begin
 	xlabel!(L"\bar{x}");ylabel!(L"{| \bar{\psi{ }} |}^2")
 	xlims!(-xbounds,xbounds)
 	xlims!(-xbounds,xbounds)
-	plot!(x_grid, x_grid.^2, label = "Potential")
+	plot!(x_grid, (x_grid.^2)./2, label = "Potential")
 		
 	end
 
@@ -3312,6 +3363,7 @@ version = "1.4.1+2"
 # ╔═╡ Cell order:
 # ╟─8b6118e4-17fd-11f0-32f5-dd5270d18be9
 # ╠═a5d3665b-0a31-4663-8c25-377e6677593c
+# ╠═710374f7-76f2-417f-825b-2879bf2f3c44
 # ╠═5d1a01ca-e65e-4d77-9f97-c956a17be8fc
 # ╠═f8d3ed5e-5789-4b7f-ba06-fa0d6a336c1d
 # ╠═ee618bb4-487d-480b-a37b-4381b32a0f66
@@ -3355,6 +3407,7 @@ version = "1.4.1+2"
 # ╠═6ff3655a-10d6-464c-b8ef-185cb6f42632
 # ╠═0c6bf9df-91a6-41a5-89cc-c90b78fbee2b
 # ╠═192b45c7-3660-48be-a685-fa7acff793e1
+# ╠═c17adabe-9b04-4927-9374-3bd2e848eb1b
 # ╠═25f6d9cd-c839-4f6e-a88f-9a3380f731d1
 # ╠═fcd8bcbf-2c80-4391-ad72-aa8760f20ca2
 # ╠═6d536851-2741-4073-99b9-ffa7a0fd30df
