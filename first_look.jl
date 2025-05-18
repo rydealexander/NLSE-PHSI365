@@ -27,19 +27,24 @@ md"""
 
 """
 
+# ╔═╡ 5d1a01ca-e65e-4d77-9f97-c956a17be8fc
+begin
+	
+	function initial_exp(x)
+		return 5*ℯ^(-(x)^2)/2 + 0.0im
+	end
+
+end
+
 # ╔═╡ f8d3ed5e-5789-4b7f-ba06-fa0d6a336c1d
 begin
 
 	# Set up our x and t grids
 	
-	xbounds = 5
-	x_granularity = 2000
+	xbounds = 10
+	x_granularity = 1000
 	x_grid = LinRange(-xbounds,xbounds,x_granularity) 
 	dx2 = x_grid[2]-x_grid[1]
-
-	function initial_exp(x,t)
-		return 5*ℯ^(-(x)^2)/2 + 0.0im
-	end
 	
 	ti = 0.0
 	tf = 15
@@ -47,7 +52,7 @@ begin
 	t_grid = LinRange(ti,tf,t_granularity) 
 
 	# Generate our initial conditions (t=0) on our grid
-	ψ_0 = initial_exp.(x_grid,t_grid[1])
+	ψ_0 = initial_exp.(x_grid)
 
 	# Set up our matrix for approximating our second derivative
 	onex2 = one.(x_grid[1:end-1])
@@ -91,6 +96,9 @@ begin
 	H_SHM_sparse = sparse(H_SHM)
 	
 end;
+
+# ╔═╡ 47d455ba-65fb-496c-8c95-6ae7bf4e98ec
+H_SHM
 
 # ╔═╡ aa473863-17c6-4844-bd31-d2c6628599cc
 @bind eig Slider(1:length(σ))
@@ -143,6 +151,9 @@ begin
 	
 end
 
+# ╔═╡ 08bc5199-044b-4a5b-b088-64a9b7347d7c
+H_SHM
+
 # ╔═╡ 62210722-8c7d-4548-a3f4-977fc42cc422
 begin
 
@@ -176,6 +187,21 @@ begin
 	xlabel!("x");ylabel!("Psi")
 	xlims!(-xbounds,xbounds)
 	ylims!(-5,5)
+	plot!(x_grid, x_grid.^2)
+
+end
+
+# ╔═╡ 738ed104-4c1d-435b-8d5c-2360eec30b23
+begin
+
+	# Plot the real and imaginary parts of the numerical solutions to our SHM potential
+
+	plot()
+	plot!(x_grid,abs2.(sol_shm[:,t_shm]),lw=1.5,c=:blue)
+	title!("Time=$(t_grid[t_shm])")
+	xlabel!("x");ylabel!("Psi")
+	xlims!(-xbounds,xbounds)
+	# ylims!(-5,5)
 	plot!(x_grid, x_grid.^2)
 
 end
@@ -3286,16 +3312,20 @@ version = "1.4.1+2"
 # ╔═╡ Cell order:
 # ╟─8b6118e4-17fd-11f0-32f5-dd5270d18be9
 # ╠═a5d3665b-0a31-4663-8c25-377e6677593c
+# ╠═5d1a01ca-e65e-4d77-9f97-c956a17be8fc
 # ╠═f8d3ed5e-5789-4b7f-ba06-fa0d6a336c1d
 # ╠═ee618bb4-487d-480b-a37b-4381b32a0f66
 # ╠═d8d02d62-7f3d-44eb-a0d5-b40ac492b7d4
+# ╠═47d455ba-65fb-496c-8c95-6ae7bf4e98ec
 # ╠═aa473863-17c6-4844-bd31-d2c6628599cc
 # ╠═58ea405a-73fd-42c3-9a99-0f98e1a9f90c
 # ╠═7ede9881-28aa-4a45-b184-6944464a1d42
 # ╠═5e5ee23a-18fd-4563-9d09-0230da1dc0ac
+# ╠═08bc5199-044b-4a5b-b088-64a9b7347d7c
 # ╠═62210722-8c7d-4548-a3f4-977fc42cc422
-# ╠═7056bb81-d3e5-40ec-9206-6f443a7dd078
 # ╠═01455290-a711-4336-9a1f-529ce7e29de9
+# ╠═7056bb81-d3e5-40ec-9206-6f443a7dd078
+# ╠═738ed104-4c1d-435b-8d5c-2360eec30b23
 # ╠═8416b3cc-3778-46f1-892b-58a07c6b3428
 # ╠═555b0f59-ed7c-41bb-9bdb-19f084abe795
 # ╠═8d24a9c7-bcca-4eaa-a073-275a21cf2453
