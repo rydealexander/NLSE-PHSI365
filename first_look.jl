@@ -52,7 +52,7 @@ begin
 	# Set up our x and t grids
 	
 	xbounds = 10
-	x_granularity = 1001
+	x_granularity = 2001
 	x_grid = LinRange(-xbounds,xbounds,x_granularity) 
 	dx2 = x_grid[2]-x_grid[1]
 	
