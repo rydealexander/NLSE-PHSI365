@@ -383,6 +383,26 @@ end
 # ╔═╡ 8fa7af89-efec-42ce-8d8b-181dac51e554
 gif(anim3, "GPE_temporal.gif", fps = 50)
 
+# ╔═╡ 0bf667fb-d823-469a-87bb-31fa0945f6fe
+begin
+
+	anim3_1 = @animate for i in 800:1501
+
+		plot()
+	
+	plot!(x_grid,abs2.(sol_gpe[:,i]),lw=1.5,c=:blue, label = L"\psi")
+	title!("Wavefunction over Time: Time=$(round(t_grid_gpe[i]))")
+	xlabel!(L"\bar{x}");ylabel!(L"{| \bar{\psi{ }}\, |}^2")
+	xlims!(-xbounds,xbounds)
+	ylims!(0, 75)
+		
+	end
+
+end
+
+# ╔═╡ 17b4c473-3c18-47b5-8123-f35e494ce469
+gif(anim3_1, "GPE_temporal_low_density.gif", fps = 50)
+
 # ╔═╡ 9b25dad5-b855-43c5-a771-4bb73ecb5a07
 begin
 
@@ -3403,6 +3423,8 @@ version = "1.4.1+2"
 # ╠═2b4c03c3-5c2c-460b-9e9c-a205b965a991
 # ╠═a4c94290-2bef-457c-8d23-591d3b7bc565
 # ╠═8fa7af89-efec-42ce-8d8b-181dac51e554
+# ╠═0bf667fb-d823-469a-87bb-31fa0945f6fe
+# ╠═17b4c473-3c18-47b5-8123-f35e494ce469
 # ╠═9b25dad5-b855-43c5-a771-4bb73ecb5a07
 # ╠═64a9f143-bd8f-4458-9a0c-6895264b5ac8
 # ╠═8a1d209a-222a-473d-88fa-59df6e7f5fd7
