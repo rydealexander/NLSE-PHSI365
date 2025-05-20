@@ -52,13 +52,13 @@ begin
 	# Set up our x and t grids
 	
 	xbounds = 10
-	x_granularity = 2001
+	x_granularity = 1001
 	x_grid = LinRange(-xbounds,xbounds,x_granularity) 
 	dx2 = x_grid[2]-x_grid[1]
 	
 	ti = 0.0
 	tf = 15
-	t_granularity = 2000
+	t_granularity = 2001
 	t_grid = LinRange(ti,tf,t_granularity) 
 
 	# Generate our initial conditions (t=0) on our grid
@@ -221,15 +221,15 @@ begin
 
 	anim = @animate for i in 1:667
 
-		plot()
-	
-		plot!(x_grid,real(sol_shm[:,i]),lw=1.5,c=:blue, label = L"Re(\psi)")
-		plot!(x_grid,imag(sol_shm[:,i]),lw=1.5,c=:red, label = L"Im(\psi)")
-		title!("Wavefunction over Time: Time=$(round(t_grid[i]))")
-		xlabel!(L"\bar{x}");ylabel!(L"\bar{\psi}")
-		xlims!(-xbounds,xbounds)
-		ylims!(-5,5)
-		plot!(x_grid, x_grid.^2, label = "Potential")
+			plot()
+		
+			plot!(x_grid,real(sol_shm[:,i]),lw=1.5,c=:blue, label = L"Re(\psi)")
+			plot!(x_grid,imag(sol_shm[:,i]),lw=1.5,c=:red, label = L"Im(\psi)")
+			title!("Wavefunction over Time: Time=$(round(t_grid[i]))")
+			xlabel!(L"\bar{x}");ylabel!(L"\bar{\psi}")
+			xlims!(-xbounds,xbounds)
+			ylims!(-2,2)
+			plot!(x_grid, x_grid.^2, label = "Potential")
 		
 	end
 
@@ -458,6 +458,7 @@ begin
 		title!("Wavefunction over Time: Time=$(round(tf_gpe_soliton_grid[i]))")
 		xlabel!(L"\bar{x}");ylabel!(L"{| \bar{\psi{ }}\, |}^2")
 		xlims!(-xbounds,xbounds)
+		ylims!(0, 150)
 		
 	end
 
@@ -477,6 +478,16 @@ begin
 
 end
 
+# ╔═╡ 1d48bd0b-8148-47dc-ba4c-a7b414a8779e
+begin
+	# Plot
+	plot()
+	plot!(x_grid,abs2.(sol_soliton_0_phi[:,t_soliton]),lw=1.5,c=:blue)
+	title!("Time=$(tf_gpe_soliton_grid[t_soliton])")
+	xlabel!(L"\bar{x}");ylabel!(L"{| \bar{\psi{ }}\, |}^2")
+	xlims!(-xbounds,xbounds)
+end
+
 # ╔═╡ b9975550-21c5-4c8a-ab42-684b7f661d81
 begin
 
@@ -488,6 +499,7 @@ begin
 		title!("Wavefunction over Time (same phase): Time=$(round(tf_gpe_soliton_grid[i]))")
 		xlabel!(L"\bar{x}");ylabel!(L"{| \bar{\psi{ }}\, |}^2")
 		xlims!(-xbounds,xbounds)
+		ylims!(0, 150)
 		
 	end
 
@@ -627,7 +639,7 @@ begin
 	plot(tf_gpe_soliton_grid, energies_times_0_phi, legend = false, title = L"Energy over time - ($\Delta\phi=0$)")
 	xlabel!(L"\bar{t}")
 	ylabel!(L"\bar{E}")
-	ylims!(0, 5000)
+	ylims!(0, 4000)
 
 end
 
@@ -736,7 +748,7 @@ begin
 
 	# What does this look like plotting real and complex?
 	
-	plot(tf_gpe_soliton_grid, real.(momentum_times_0_phi), legend=false, title = L"Momentum of Colliding Solitons over Time ($\Delta\phi=0$)")
+	plot(tf_gpe_soliton_grid[1: end-100], real.(momentum_times_0_phi[1: end-100]), legend=false, title = L"Momentum of Colliding Solitons over Time ($\Delta\phi=0$)")
 	xlabel!("Time")
 	ylabel!("Momentum")
 
@@ -808,7 +820,7 @@ begin
 	title!("Wavefunction over Time (same phase): Time=$(round(tf_gpe_soliton_grid[i]))")
 	xlabel!(L"\bar{x}");ylabel!(L"{| \bar{\psi{ }} |}^2")
 	xlims!(-xbounds,xbounds)
-	xlims!(-xbounds,xbounds)
+	ylims!(0, 150)
 	plot!(x_grid, (x_grid.^2)./2, label = "Potential")
 		
 	end
@@ -3394,6 +3406,7 @@ version = "1.4.1+2"
 # ╠═9b25dad5-b855-43c5-a771-4bb73ecb5a07
 # ╠═64a9f143-bd8f-4458-9a0c-6895264b5ac8
 # ╠═8a1d209a-222a-473d-88fa-59df6e7f5fd7
+# ╠═1d48bd0b-8148-47dc-ba4c-a7b414a8779e
 # ╠═af8e1724-f606-45de-aaa6-a7db2ad0a42f
 # ╠═f044470f-c3d8-4751-821a-99adc36ba51f
 # ╠═6bcb395c-bc77-4f48-afe6-6d9d7248308f
