@@ -223,8 +223,8 @@ begin
 
 			plot()
 		
-			plot!(x_grid,real(sol_shm[:,i]),lw=1.5,c=:blue, label = L"Re(\psi)")
-			plot!(x_grid,imag(sol_shm[:,i]),lw=1.5,c=:red, label = L"Im(\psi)")
+			plot!(x_grid,real(sol_shm[:,i]),lw=1.5,c=:blue, label = L"Re(\bar{\psi})")
+			plot!(x_grid,imag(sol_shm[:,i]),lw=1.5,c=:red, label = L"Im(\bar{\psi})")
 			title!("Wavefunction over Time: Time=$(round(t_grid[i]))")
 			xlabel!(L"\bar{x}");ylabel!(L"\bar{\psi}")
 			xlims!(-xbounds,xbounds)
@@ -283,8 +283,8 @@ begin
 
 		plot()
 	
-		plot!(x_grid,real(sol_shm_offset[:,i]),lw=1.5,c=:blue, label = L"Re(\psi)")
-		plot!(x_grid,imag(sol_shm_offset[:,i]),lw=1.5,c=:red, label = L"Im(\psi)")
+		plot!(x_grid,real(sol_shm_offset[:,i]),lw=1.5,c=:blue, label = L"Re(\bar{\psi})")
+		plot!(x_grid,imag(sol_shm_offset[:,i]),lw=1.5,c=:red, label = L"Im(\bar{\psi})")
 		title!("Wavefunction over Time: Time=$(round(t_grid[i]))")
 		xlabel!(L"\bar{x}");ylabel!(L"\bar{\psi}")
 		xlims!(-xbounds,xbounds)
@@ -401,7 +401,7 @@ begin
 end
 
 # ╔═╡ 17b4c473-3c18-47b5-8123-f35e494ce469
-gif(anim3_1, "GPE_temporal_low_density.gif", fps = 50)
+gif(anim3_1, "GPE_temporal_high_density.gif", fps = 50)
 
 # ╔═╡ 9b25dad5-b855-43c5-a771-4bb73ecb5a07
 begin
