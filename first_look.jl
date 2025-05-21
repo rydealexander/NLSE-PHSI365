@@ -533,7 +533,17 @@ gif(anim5, "GPE_soliton_0_phase_offset.gif", fps = 50)
 # Think about doing heatmap plots of collisions to investigate behaviour, like in book and Williams code
 
 # ╔═╡ ffba32b8-4616-4de7-bc72-871816840569
-heatmap(abs2.(sol_soliton))
+begin 
+
+	h = abs2.(sol_soliton')
+	
+	heatmap(x_grid, t_grid, h)
+
+	xlabel!("x")
+
+	ylabel!("t")
+
+end
 
 # ╔═╡ 79d16592-e768-403f-a9c9-b986761d3534
 begin
