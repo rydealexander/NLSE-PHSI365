@@ -99,13 +99,14 @@ begin
 
 	# Total_Mat = -(1/2).*Dxx + (1/2).*potential_mat
 
-	H_SHM = -(0.5).*dxx + (0.5).*potential
+	H_SHM = -1((0.5).*dxx - (0.5).*potential)
 
 	σ, u = eigen(H_SHM)
-
-	H_SHM_sparse = sparse(H_SHM)
 	
 end;
+
+# ╔═╡ cd26515d-d863-49f3-aad1-ef778828e95e
+H_SHM_sparse = sparse(H_SHM)
 
 # ╔═╡ 47d455ba-65fb-496c-8c95-6ae7bf4e98ec
 H_SHM
@@ -171,7 +172,7 @@ begin
 	
 	function schrod_shm!(dψ,ψ,p,t)
 
-			dψ .= -1.0*im*H_SHM_sparse * ψ
+			dψ .= 1.0*im*H_SHM_sparse * ψ
 	end 
 
 	alg1 = Vern6()
@@ -269,7 +270,7 @@ begin
 	plot!(x_grid,real(sol_shm_offset[:,t_shm_offset]),lw=1.5,c=:blue)
 	plot!(x_grid,imag(sol_shm_offset[:,t_shm_offset]),lw=1.5,c=:red)
 	title!("Time=$(t_grid[t_shm_offset])")
-	xlabel!(L"\bar{x}");ylabel!(L"{| \bar{\psi{ }}\, |}^2")
+	xlabel!(L"\bar{x}");ylabel!(L"\bar{\psi}")
 	xlims!(-xbounds,xbounds)
 	ylims!(-5,5)
 	plot!(x_grid, x_grid.^2)
@@ -3400,6 +3401,7 @@ version = "1.4.1+2"
 # ╠═f8d3ed5e-5789-4b7f-ba06-fa0d6a336c1d
 # ╠═ee618bb4-487d-480b-a37b-4381b32a0f66
 # ╠═d8d02d62-7f3d-44eb-a0d5-b40ac492b7d4
+# ╠═cd26515d-d863-49f3-aad1-ef778828e95e
 # ╠═47d455ba-65fb-496c-8c95-6ae7bf4e98ec
 # ╠═aa473863-17c6-4844-bd31-d2c6628599cc
 # ╠═58ea405a-73fd-42c3-9a99-0f98e1a9f90c
