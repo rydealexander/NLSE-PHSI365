@@ -848,7 +848,7 @@ begin
 		plot()
 	
 	plot!(x_grid,abs2.(sol_soliton_potential[:,i]),lw=1.5,c=:blue, label = "Wavefunction")
-	title!("Wavefunction over Time (same phase): Time=$(round(tf_gpe_soliton_grid[i]))")
+	title!("Wavefunction over Time (pi phase shift): Time=$(round(tf_gpe_soliton_grid[i]))")
 	xlabel!(L"\bar{x}");ylabel!(L"{| \bar{\psi{ }} |}^2")
 	xlims!(-xbounds,xbounds)
 	ylims!(0, 150)
