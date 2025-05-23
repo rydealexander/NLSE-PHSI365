@@ -27,16 +27,6 @@ md"""
 
 """
 
-# ╔═╡ 710374f7-76f2-417f-825b-2879bf2f3c44
-begin
-
-	# William's code
-
-	
-	
-
-end
-
 # ╔═╡ 5d1a01ca-e65e-4d77-9f97-c956a17be8fc
 begin
 	
@@ -3406,7 +3396,6 @@ version = "1.4.1+2"
 # ╔═╡ Cell order:
 # ╟─8b6118e4-17fd-11f0-32f5-dd5270d18be9
 # ╠═a5d3665b-0a31-4663-8c25-377e6677593c
-# ╠═710374f7-76f2-417f-825b-2879bf2f3c44
 # ╠═5d1a01ca-e65e-4d77-9f97-c956a17be8fc
 # ╠═f8d3ed5e-5789-4b7f-ba06-fa0d6a336c1d
 # ╠═ee618bb4-487d-480b-a37b-4381b32a0f66
